@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { User, Mail, Lock, UserPlus, LogIn } from 'lucide-react';
 
 interface LoginFormProps {
-  onLogin: (username: string, password: string) => Promise<boolean>;
+  onLogin: (username: string) => Promise<boolean>;
   onRegister: (userData: RegisterData) => Promise<boolean>;
 }
 
@@ -42,11 +42,11 @@ export default function LoginForm({ onLogin, onRegister }: LoginFormProps) {
     setError('');
 
     try {
-      const success = await onLogin(loginData.username, loginData.password);
+      const success = await onLogin(loginData.username);
       if (!success) {
         setError('Invalid username or password');
       }
-    } catch (error) {
+    } catch {
       setError('Login failed. Please try again.');
     } finally {
       setIsLoading(false);
@@ -69,7 +69,7 @@ export default function LoginForm({ onLogin, onRegister }: LoginFormProps) {
       if (!success) {
         setError('Registration failed. Username or email may already exist.');
       }
-    } catch (error) {
+    } catch {
       setError('Registration failed. Please try again.');
     } finally {
       setIsLoading(false);

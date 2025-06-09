@@ -67,7 +67,7 @@ export default function QuizComponent({ questions, onComplete, onRestart }: Quiz
           <span className="font-bold">{questions.length}</span> questions correct!
         </div>
         <div className="text-lg text-gray-500 mb-8">
-          That's {percentage}%! {percentage >= 80 ? 'Excellent work!' : percentage >= 60 ? 'Good job!' : 'Keep practicing!'}
+          That&apos;s {percentage}%! {percentage >= 80 ? 'Excellent work!' : percentage >= 60 ? 'Good job!' : 'Keep practicing!'}
         </div>
         <button
           onClick={handleRestart}

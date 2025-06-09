@@ -1,19 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { wordpressAPI, ProgressRecord } from '@/lib/wordpress';
 
 export function useProgress(userId: number | null) {
   const [progress, setProgress] = useState<ProgressRecord[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  useEffect(() => {
-    if (userId) {
-      loadProgress();
-    }
-  }, [userId]);
-
-  const loadProgress = async () => {
+  const loadProgress = useCallback(async () => {
     if (!userId) return;
     
     try {
@@ -25,7 +19,13 @@ export function useProgress(userId: number | null) {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [userId]);
+
+  useEffect(() => {
+    if (userId) {
+      loadProgress();
+    }
+  }, [userId, loadProgress]);
 
   const saveStoryRead = async (athleteId: number, athleteName: string, timeSpent?: number) => {
     if (!userId) return;

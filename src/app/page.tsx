@@ -28,7 +28,6 @@ export default function Home() {
   const [storyStartTime, setStoryStartTime] = useState<number | null>(null);
 
   const { 
-    progress, 
     saveStoryRead, 
     saveQuizScore, 
     getAthleteProgress 
@@ -43,7 +42,7 @@ export default function Home() {
     setIsLoading(false);
   }, []);
 
-  const handleLogin = async (username: string, password: string): Promise<boolean> => {
+  const handleLogin = async (username: string): Promise<boolean> => {
     try {
       const userData = await wordpressAPI.getUser(username);
       if (userData) {

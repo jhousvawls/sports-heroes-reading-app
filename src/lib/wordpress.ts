@@ -125,7 +125,7 @@ class WordPressAPI {
   async getUserProgress(userId: number): Promise<ProgressRecord[]> {
     try {
       const posts = await this.makeRequest(`sports-progress?meta_key=user_id&meta_value=${userId}`);
-      return posts.map((post: any) => JSON.parse(post.content.rendered));
+      return posts.map((post: { content: { rendered: string } }) => JSON.parse(post.content.rendered));
     } catch (error) {
       console.error('Error fetching progress:', error);
       return [];
@@ -136,7 +136,7 @@ class WordPressAPI {
   async getAthleteProgress(userId: number, athleteId: number): Promise<ProgressRecord | null> {
     try {
       const posts = await this.makeRequest(`sports-progress?meta_key=user_id&meta_value=${userId}`);
-      const athletePost = posts.find((post: any) => {
+      const athletePost = posts.find((post: { content: { rendered: string } }) => {
         const content = JSON.parse(post.content.rendered);
         return content.athlete_id === athleteId;
       });
@@ -152,7 +152,7 @@ class WordPressAPI {
   async updateProgress(userId: number, athleteId: number, updates: Partial<ProgressRecord>): Promise<void> {
     try {
       const posts = await this.makeRequest(`sports-progress?meta_key=user_id&meta_value=${userId}`);
-      const athletePost = posts.find((post: any) => {
+      const athletePost = posts.find((post: { id: number; content: { rendered: string } }) => {
         const content = JSON.parse(post.content.rendered);
         return content.athlete_id === athleteId;
       });
