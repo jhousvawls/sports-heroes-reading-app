@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { X, Printer, Download, FileText } from 'lucide-react';
+import { X, Printer, Download } from 'lucide-react';
 import { Athlete } from '@/data/athletes';
 import { SuggestedAthlete } from '@/data/suggestedAthletes';
 
@@ -81,7 +81,7 @@ export default function PrintPreview({ athlete, onClose }: PrintPreviewProps) {
       }
       
       // Add footer
-      const pageCount = (doc as any).internal.getNumberOfPages();
+      const pageCount = (doc as unknown as { internal: { getNumberOfPages: () => number } }).internal.getNumberOfPages();
       for (let i = 1; i <= pageCount; i++) {
         doc.setPage(i);
         doc.setFontSize(10);

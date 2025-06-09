@@ -87,7 +87,7 @@ class WordPressAPI {
     try {
       // First try to get all users and find by slug/username
       const users = await this.makeRequest('users');
-      const user = users.find((u: any) => u.slug === username || u.name === username);
+      const user = users.find((u: { slug: string; name: string; id: number; email?: string; first_name?: string; last_name?: string }) => u.slug === username || u.name === username);
       
       if (user) {
         return {
