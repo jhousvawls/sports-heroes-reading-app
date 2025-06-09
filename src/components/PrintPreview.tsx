@@ -3,9 +3,12 @@
 import { useState } from 'react';
 import { X, Printer, Download, FileText } from 'lucide-react';
 import { Athlete } from '@/data/athletes';
+import { SuggestedAthlete } from '@/data/suggestedAthletes';
+
+type AthleteType = Athlete | SuggestedAthlete;
 
 interface PrintPreviewProps {
-  athlete: Athlete;
+  athlete: AthleteType;
   onClose: () => void;
 }
 

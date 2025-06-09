@@ -2,15 +2,18 @@
 
 import { useState, useEffect } from 'react';
 import { athletes, Athlete } from '@/data/athletes';
+import { suggestedAthletes, SuggestedAthlete } from '@/data/suggestedAthletes';
 import AthleteCard from '@/components/AthleteCard';
 import QuizComponent from '@/components/QuizComponent';
 import LoginForm from '@/components/LoginForm';
 import PrintPreview from '@/components/PrintPreview';
+import SuggestionModal from '@/components/SuggestionModal';
 import { useProgress } from '@/hooks/useProgress';
 import { wordpressAPI, WordPressUser } from '@/lib/wordpress';
-import { ArrowLeft, Volume2, VolumeX, Home as HomeIcon, LogOut, User, Trophy, Clock, Printer, FileText } from 'lucide-react';
+import { ArrowLeft, Volume2, VolumeX, Home as HomeIcon, LogOut, User, Trophy, Clock, Printer, FileText, Plus, Star } from 'lucide-react';
 
 type ViewState = 'home' | 'story' | 'quiz' | 'progress';
+type AthleteType = Athlete | SuggestedAthlete;
 
 interface RegisterData {
   username: string;
@@ -22,12 +25,13 @@ interface RegisterData {
 
 export default function Home() {
   const [currentView, setCurrentView] = useState<ViewState>('home');
-  const [selectedAthlete, setSelectedAthlete] = useState<Athlete | null>(null);
+  const [selectedAthlete, setSelectedAthlete] = useState<AthleteType | null>(null);
   const [isReading, setIsReading] = useState(false);
   const [user, setUser] = useState<WordPressUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [storyStartTime, setStoryStartTime] = useState<number | null>(null);
   const [showPrintPreview, setShowPrintPreview] = useState(false);
+  const [showSuggestionModal, setShowSuggestionModal] = useState(false);
 
   const { 
     saveStoryRead, 
@@ -40,6 +44,17 @@ export default function Home() {
     const storedUser = localStorage.getItem('sportsHeroesUser');
     if (storedUser) {
       setUser(JSON.parse(storedUser));
+    } else {
+      // For testing purposes, create a mock user
+      const mockUser = {
+        id: 1,
+        username: 'testuser',
+        first_name: 'Test',
+        last_name: 'User',
+        email: 'test@example.com'
+      };
+      setUser(mockUser);
+      localStorage.setItem('sportsHeroesUser', JSON.stringify(mockUser));
     }
     setIsLoading(false);
   }, []);
@@ -86,7 +101,13 @@ export default function Home() {
     setIsReading(false);
   };
 
-  const handleAthleteSelect = (athlete: Athlete) => {
+  const handleAthleteSelect = (athlete: AthleteType) => {
+    setSelectedAthlete(athlete);
+    setCurrentView('story');
+    setStoryStartTime(Date.now());
+  };
+
+  const handleSuggestedAthleteSelect = (athlete: SuggestedAthlete) => {
     setSelectedAthlete(athlete);
     setCurrentView('story');
     setStoryStartTime(Date.now());
@@ -247,14 +268,23 @@ export default function Home() {
               <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4 sm:mb-6">Your Reading Progress</h2>
               
               <div className="grid gap-4 sm:gap-6">
-                {athletes.map((athlete) => {
+                {[...athletes, ...suggestedAthletes].map((athlete) => {
                   const athleteProgress = getAthleteProgress(athlete.id);
+                  const isSuggested = athlete.id > 100; // Suggested athletes have IDs > 100
                   return (
                     <div key={athlete.id} className="border border-dark rounded-lg p-4 sm:p-6 bg-smokey-gray">
                       <div className="flex items-center gap-3 sm:gap-4 mb-3 sm:mb-4">
                         <div className="text-3xl sm:text-4xl">{athlete.image}</div>
                         <div className="min-w-0 flex-1">
-                          <h3 className="text-lg sm:text-xl font-bold text-white truncate">{athlete.name}</h3>
+                          <div className="flex items-center gap-2 mb-1">
+                            <h3 className="text-lg sm:text-xl font-bold text-white truncate">{athlete.name}</h3>
+                            {isSuggested && (
+                              <span className="bg-purple-600 text-white text-xs px-2 py-1 rounded-full font-semibold flex-shrink-0">
+                                <Star className="w-3 h-3 inline mr-1" />
+                                Suggested
+                              </span>
+                            )}
+                          </div>
                           <p className="text-sm sm:text-base text-secondary">{athlete.sport}</p>
                         </div>
                       </div>
@@ -290,6 +320,13 @@ export default function Home() {
             </div>
           </div>
         </div>
+
+        {/* Suggestion Modal */}
+        <SuggestionModal
+          isOpen={showSuggestionModal}
+          onClose={() => setShowSuggestionModal(false)}
+          onSelectAthlete={handleSuggestedAthleteSelect}
+        />
       </div>
     );
   }
@@ -309,34 +346,69 @@ export default function Home() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 max-w-6xl mx-auto">
-            {athletes.map((athlete) => {
-              const athleteProgress = getAthleteProgress(athlete.id);
-              return (
-                <div key={athlete.id} className="relative">
-                  <AthleteCard
-                    athlete={athlete}
-                    onSelect={handleAthleteSelect}
-                  />
-                  {athleteProgress && (
-                    <div className="absolute top-2 right-2 flex gap-1">
-                      {athleteProgress.story_read && (
-                        <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
-                          <span className="text-white text-xs">📖</span>
-                        </div>
-                      )}
-                      {athleteProgress.quiz_completed && (
-                        <div className="w-6 h-6 bg-tennessee-orange rounded-full flex items-center justify-center">
-                          <span className="text-white text-xs">✓</span>
+          <div className="space-y-8">
+            {/* Main Athletes */}
+            <div>
+              <h3 className="text-xl sm:text-2xl font-bold text-white mb-4 sm:mb-6 text-center">
+                Featured Sports Heroes
+              </h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 max-w-6xl mx-auto">
+                {athletes.map((athlete) => {
+                  const athleteProgress = getAthleteProgress(athlete.id);
+                  return (
+                    <div key={athlete.id} className="relative">
+                      <AthleteCard
+                        athlete={athlete}
+                        onSelect={handleAthleteSelect}
+                      />
+                      {athleteProgress && (
+                        <div className="absolute top-2 right-2 flex gap-1">
+                          {athleteProgress.story_read && (
+                            <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
+                              <span className="text-white text-xs">📖</span>
+                            </div>
+                          )}
+                          {athleteProgress.quiz_completed && (
+                            <div className="w-6 h-6 bg-tennessee-orange rounded-full flex items-center justify-center">
+                              <span className="text-white text-xs">✓</span>
+                            </div>
+                          )}
                         </div>
                       )}
                     </div>
-                  )}
-                </div>
-              );
-            })}
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Suggestion Button */}
+            <div className="text-center">
+              <div className="bg-dark-card rounded-xl p-6 sm:p-8 max-w-2xl mx-auto">
+                <div className="text-4xl mb-4">🌟</div>
+                <h3 className="text-xl sm:text-2xl font-bold text-white mb-3">
+                  Want to Learn About More Athletes?
+                </h3>
+                <p className="text-secondary mb-6">
+                  Discover amazing stories from soccer, basketball, baseball, and football heroes!
+                </p>
+                <button
+                  onClick={() => setShowSuggestionModal(true)}
+                  className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 sm:py-4 sm:px-8 rounded-full text-lg sm:text-xl transition-colors duration-200 shadow-lg flex items-center gap-3 mx-auto"
+                >
+                  <Plus className="w-5 h-5 sm:w-6 sm:h-6" />
+                  Suggest a Sports Hero
+                </button>
+              </div>
+            </div>
           </div>
         </div>
+
+        {/* Suggestion Modal */}
+        <SuggestionModal
+          isOpen={showSuggestionModal}
+          onClose={() => setShowSuggestionModal(false)}
+          onSelectAthlete={handleSuggestedAthleteSelect}
+        />
       </div>
     );
   }
@@ -436,6 +508,13 @@ export default function Home() {
             onClose={() => setShowPrintPreview(false)}
           />
         )}
+
+        {/* Suggestion Modal */}
+        <SuggestionModal
+          isOpen={showSuggestionModal}
+          onClose={() => setShowSuggestionModal(false)}
+          onSelectAthlete={handleSuggestedAthleteSelect}
+        />
       </div>
     );
   }
@@ -483,6 +562,13 @@ export default function Home() {
             />
           </div>
         </div>
+
+        {/* Suggestion Modal */}
+        <SuggestionModal
+          isOpen={showSuggestionModal}
+          onClose={() => setShowSuggestionModal(false)}
+          onSelectAthlete={handleSuggestedAthleteSelect}
+        />
       </div>
     );
   }

@@ -1,9 +1,12 @@
 import { Athlete } from '@/data/athletes';
+import { SuggestedAthlete } from '@/data/suggestedAthletes';
 import { BookOpen, Trophy, Heart } from 'lucide-react';
 
+type AthleteType = Athlete | SuggestedAthlete;
+
 interface AthleteCardProps {
-  athlete: Athlete;
-  onSelect: (athlete: Athlete) => void;
+  athlete: AthleteType;
+  onSelect: (athlete: AthleteType) => void;
 }
 
 export default function AthleteCard({ athlete, onSelect }: AthleteCardProps) {
