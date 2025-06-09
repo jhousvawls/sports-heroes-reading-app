@@ -39,22 +39,26 @@ export default function ServiceWorkerRegistration() {
         }
       });
 
-      // Handle online/offline status
-      const handleOnline = () => {
-        console.log('App is online');
-        // Trigger background sync if available
-        if ('serviceWorker' in navigator && 'sync' in window.ServiceWorkerRegistration.prototype) {
-          navigator.serviceWorker.ready.then((registration) => {
-            // Type assertion for background sync
-            const syncRegistration = registration as any;
-            if (syncRegistration.sync) {
-              return syncRegistration.sync.register('progress-sync');
-            }
-          }).catch((error) => {
-            console.error('Background sync registration failed:', error);
-          });
-        }
-      };
+        // Handle online/offline status
+        const handleOnline = () => {
+          console.log('App is online');
+          // Trigger background sync if available
+          if ('serviceWorker' in navigator && 'sync' in window.ServiceWorkerRegistration.prototype) {
+            navigator.serviceWorker.ready.then((registration) => {
+              // Type assertion for background sync
+              const syncRegistration = registration as ServiceWorkerRegistration & {
+                sync?: {
+                  register: (tag: string) => Promise<void>;
+                };
+              };
+              if (syncRegistration.sync) {
+                return syncRegistration.sync.register('progress-sync');
+              }
+            }).catch((error) => {
+              console.error('Background sync registration failed:', error);
+            });
+          }
+        };
 
       const handleOffline = () => {
         console.log('App is offline');

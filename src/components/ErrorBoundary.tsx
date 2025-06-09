@@ -68,7 +68,7 @@ class ErrorBoundary extends Component<Props, State> {
             </h1>
             
             <p className="text-secondary mb-6">
-              We're sorry, but something unexpected happened. Don't worry - your progress is saved!
+              We&apos;re sorry, but something unexpected happened. Don&apos;t worry - your progress is saved!
             </p>
 
             <div className="space-y-3">

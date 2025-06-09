@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import ErrorBoundary from "@/components/ErrorBoundary";
@@ -18,8 +18,6 @@ export const metadata: Metadata = {
   title: "Sports Heroes Reading App",
   description: "Interactive reading comprehension app for kids featuring athlete biographies with quizzes and progress tracking.",
   manifest: "/manifest.json",
-  themeColor: "#ff6b35",
-  viewport: "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
@@ -29,6 +27,14 @@ export const metadata: Metadata = {
     icon: "/favicon.ico",
     apple: "/favicon.ico",
   },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  themeColor: "#ff6b35",
 };
 
 export default function RootLayout({

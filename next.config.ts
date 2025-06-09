@@ -3,7 +3,6 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   // Enable experimental features for better performance
   experimental: {
-    optimizeCss: true,
     optimizePackageImports: ['lucide-react'],
   },
 
@@ -17,9 +16,6 @@ const nextConfig: NextConfig = {
 
   // Compression
   compress: true,
-
-  // Performance optimizations
-  swcMinify: true,
   
   // Bundle analyzer (only in development)
   ...(process.env.ANALYZE === 'true' && {

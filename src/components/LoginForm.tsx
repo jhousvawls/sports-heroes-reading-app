@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { User, Mail, Lock, UserPlus, LogIn, KeyRound } from 'lucide-react';
+import { User, Lock, UserPlus, LogIn, KeyRound } from 'lucide-react';
 
 interface LoginFormProps {
   onLogin: (username: string) => Promise<boolean>;
