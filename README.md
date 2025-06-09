@@ -93,9 +93,29 @@ The app creates progress entries with these fields:
 
 ## Current Athletes
 
+### Featured Athletes (6 total)
 1. **Patrick Mahomes** (Football) - 3 questions
 2. **Serena Williams** (Tennis) - 3 questions  
 3. **LeBron James** (Basketball) - 3 questions
+4. **Simone Biles** (Gymnastics) - 3 questions
+5. **Lionel Messi** (Soccer) - 3 questions
+6. **Muhammad Ali** (Boxing) - 3 questions
+
+### Suggested Athletes (20 total - 5 per sport)
+
+#### Soccer (5 athletes)
+- Pelé, Cristiano Ronaldo, Mia Hamm, Diego Maradona, Ronaldinho
+
+#### Basketball (5 athletes)  
+- Michael Jordan, LeBron James, Kobe Bryant, Magic Johnson, Stephen Curry
+
+#### Baseball (5 athletes)
+- Babe Ruth, Jackie Robinson, Derek Jeter, Lou Gehrig, Hank Aaron
+
+#### Football (5 athletes)
+- Tom Brady, Joe Montana, Jerry Rice, Jim Brown, Peyton Manning
+
+**Total: 26 athletes with inspiring stories and educational quizzes**
 
 ## Adding New Athletes
 
@@ -108,27 +128,204 @@ The app creates progress entries with these fields:
 
 ## Deployment to WP Engine
 
+### Prerequisites
+
+- WP Engine account with Node.js hosting enabled
+- WordPress site (can be on same WP Engine account or separate)
+- Git repository access
+- Domain configured for your Node.js environment
+
 ### Build for Production
 
 ```bash
+# Install dependencies
+npm install
+
+# Build the application
 npm run build
+
+# Test the build locally (optional)
+npm start
 ```
 
 ### Environment Variables for Production
 
+Create these environment variables in your WP Engine User Portal:
+
 ```env
 NODE_ENV=production
-NEXT_PUBLIC_WORDPRESS_URL=https://your-production-site.com
-WORDPRESS_USERNAME=your_production_username
-WORDPRESS_PASSWORD=your_production_app_password
+NEXT_PUBLIC_WORDPRESS_URL=https://your-wordpress-site.wpengine.com
+WORDPRESS_USERNAME=your_wp_username
+WORDPRESS_PASSWORD=your_wp_app_password
 ```
 
-### WP Engine Deployment
+### WP Engine Node.js Deployment
 
-1. Upload built files to your WP Engine Node.js environment
-2. Configure environment variables in WP Engine dashboard
-3. Ensure WordPress plugin is installed and activated
-4. Test API connectivity
+#### Method 1: Git Deployment (Recommended)
+
+1. **Connect Git Repository**:
+   - Log into WP Engine User Portal
+   - Navigate to your Node.js environment
+   - Go to "Git Push" settings
+   - Connect your GitHub repository
+
+2. **Configure Build Settings**:
+   ```bash
+   # Build command
+   npm run build
+   
+   # Start command  
+   npm start
+   
+   # Node.js version
+   18.x or 20.x (latest LTS)
+   ```
+
+3. **Deploy**:
+   ```bash
+   git push wpengine main
+   ```
+
+#### Method 2: Manual Upload
+
+1. **Build Locally**:
+   ```bash
+   npm run build
+   ```
+
+2. **Upload Files**:
+   - Compress your project folder
+   - Upload via WP Engine User Portal
+   - Extract in your Node.js environment root
+
+### WordPress Plugin Setup
+
+1. **Install Plugin on WordPress Site**:
+   ```bash
+   # If WordPress is on WP Engine
+   # Upload via WordPress Admin or SFTP
+   
+   # Copy plugin file to:
+   /wp-content/plugins/sports-heroes-progress.php
+   ```
+
+2. **Activate Plugin**:
+   - WordPress Admin → Plugins
+   - Find "Sports Heroes Progress Tracker"
+   - Click "Activate"
+
+3. **Create Application Password**:
+   - Users → Your Profile
+   - Application Passwords section
+   - Add "Sports Heroes App"
+   - Copy generated password
+
+### Domain Configuration
+
+1. **Primary Domain**:
+   - Configure your custom domain in WP Engine
+   - Update DNS records to point to WP Engine
+   - Enable SSL certificate
+
+2. **CORS Configuration** (if needed):
+   ```javascript
+   // next.config.ts
+   const nextConfig = {
+     async headers() {
+       return [
+         {
+           source: '/api/:path*',
+           headers: [
+             { key: 'Access-Control-Allow-Origin', value: 'https://your-wordpress-site.com' },
+             { key: 'Access-Control-Allow-Methods', value: 'GET,POST,PUT,DELETE' },
+             { key: 'Access-Control-Allow-Headers', value: 'Content-Type,Authorization' },
+           ],
+         },
+       ];
+     },
+   };
+   ```
+
+### Performance Optimization for WP Engine
+
+1. **CDN Configuration**:
+   - Enable WP Engine's Global Edge Security
+   - Configure static asset caching
+   - Optimize image delivery
+
+2. **Caching Headers**:
+   ```javascript
+   // next.config.ts
+   const nextConfig = {
+     async headers() {
+       return [
+         {
+           source: '/_next/static/:path*',
+           headers: [
+             { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
+           ],
+         },
+       ];
+     },
+   };
+   ```
+
+### Monitoring and Debugging
+
+1. **Application Logs**:
+   - Access via WP Engine User Portal
+   - Monitor Node.js application logs
+   - Check for API connection errors
+
+2. **Health Checks**:
+   ```bash
+   # Test WordPress API connectivity
+   curl -X GET "https://your-wordpress-site.com/wp-json/wp/v2/users/me" \
+        -H "Authorization: Basic $(echo -n 'username:app_password' | base64)"
+   ```
+
+3. **Performance Monitoring**:
+   - Use WP Engine's performance insights
+   - Monitor response times and error rates
+   - Set up uptime monitoring
+
+### Deployment Checklist
+
+- [ ] WordPress plugin installed and activated
+- [ ] Application password created
+- [ ] Environment variables configured
+- [ ] Domain DNS configured
+- [ ] SSL certificate enabled
+- [ ] API connectivity tested
+- [ ] User registration/login tested
+- [ ] Story reading functionality verified
+- [ ] Quiz completion and progress tracking working
+- [ ] Performance optimizations applied
+- [ ] Monitoring and alerts configured
+
+### Troubleshooting
+
+**Common Issues**:
+
+1. **API Connection Errors**:
+   - Verify WordPress URL and credentials
+   - Check application password permissions
+   - Ensure WordPress site is accessible
+
+2. **Build Failures**:
+   - Check Node.js version compatibility
+   - Verify all dependencies are installed
+   - Review build logs for specific errors
+
+3. **Performance Issues**:
+   - Enable caching headers
+   - Optimize images and assets
+   - Use WP Engine's CDN features
+
+**Support Resources**:
+- WP Engine Node.js documentation
+- WP Engine support team
+- WordPress REST API documentation
 
 ## Development
 
