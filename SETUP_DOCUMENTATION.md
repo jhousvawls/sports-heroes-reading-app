@@ -42,6 +42,7 @@ A Next.js reading application that integrates with WordPress for user management
 - ✅ Progress tracking dashboard
 - ✅ Read-aloud functionality
 - ✅ Responsive design
+- ✅ **Athlete Suggestion System** (NEW - June 8, 2025)
 
 ## 🔧 Remaining Setup Tasks
 
@@ -80,9 +81,12 @@ sports-heroes-app/
 │   ├── components/
 │   │   ├── AthleteCard.tsx       # Sports hero card component
 │   │   ├── LoginForm.tsx         # User authentication form
-│   │   └── QuizComponent.tsx     # Interactive quiz component
+│   │   ├── PrintPreview.tsx      # Print preview component
+│   │   ├── QuizComponent.tsx     # Interactive quiz component
+│   │   └── SuggestionModal.tsx   # Athlete suggestion modal (NEW)
 │   ├── data/
-│   │   └── athletes.ts           # Sports hero data and stories
+│   │   ├── athletes.ts           # Original sports hero data
+│   │   └── suggestedAthletes.ts  # Suggested athletes database (NEW)
 │   ├── hooks/
 │   │   └── useProgress.ts        # Progress tracking hook
 │   └── lib/
@@ -90,6 +94,7 @@ sports-heroes-app/
 ├── wordpress-plugin/
 │   └── sports-heroes-progress.php # WordPress plugin
 ├── .env.local                    # Environment variables
+├── SETUP_DOCUMENTATION.md       # Comprehensive setup guide
 └── package.json                  # Dependencies and scripts
 ```
 
@@ -224,5 +229,208 @@ WORDPRESS_PASSWORD=cpL6 KkEk K408 WsAN YsDE EZnj
 
 ---
 
+## 🌟 Athlete Suggestion System Documentation (Added June 8, 2025)
+
+### Overview
+The Athlete Suggestion System allows children to discover and request new sports heroes beyond the original three featured athletes. This feature includes a comprehensive database of 8 additional athletes across 4 sports, with full stories, quizzes, and progress tracking integration.
+
+### 📁 New Files Added
+
+#### 1. `src/data/suggestedAthletes.ts`
+**Purpose**: Database of suggested athletes with stories and quizzes
+**Content**:
+- 8 new athletes across 4 sports
+- Complete biographical stories (age-appropriate)
+- 3 quiz questions per athlete
+- Sport categorization system
+- TypeScript interfaces for type safety
+
+**Athletes Included**:
+- **Soccer**: Mia Hamm, Pelé
+- **Basketball**: Michael Jordan, Stephen Curry
+- **Baseball**: Jackie Robinson, Babe Ruth
+- **Football**: Tom Brady, Jerry Rice
+
+#### 2. `src/components/SuggestionModal.tsx`
+**Purpose**: Interactive modal for athlete selection
+**Features**:
+- Sport category selection with visual icons
+- Search functionality for specific athletes
+- "Surprise Me!" random selection
+- Quick athlete descriptions
+- Responsive design
+- Smooth animations and transitions
+
+### 🔧 Technical Implementation
+
+#### Data Structure
+```typescript
+interface SuggestedAthlete {
+  id: number;
+  name: string;
+  sport: string;
+  image: string;
+  description: string;
+  story: string;
+  questions: Question[];
+}
+
+interface SportCategory {
+  name: string;
+  emoji: string;
+  athletes: SuggestedAthlete[];
+}
+```
+
+#### Integration Points
+1. **Main App Component** (`src/app/page.tsx`):
+   - Added suggestion modal state management
+   - Integrated with existing athlete selection flow
+   - Maintains consistent UI/UX patterns
+
+2. **Progress Tracking**:
+   - Suggested athletes use IDs > 100 for distinction
+   - Full integration with existing progress system
+   - Visual indicators in progress view
+
+3. **Type System**:
+   - Union type `AthleteType = Athlete | SuggestedAthlete`
+   - Consistent interfaces across components
+   - Type-safe athlete handling
+
+### 🎨 User Experience Features
+
+#### Modal Interface
+- **Initial View**: Sport category selection with athlete counts
+- **Search Option**: Text input for specific athlete names
+- **Surprise Feature**: Random athlete selection button
+- **Category Filtering**: Filter by sport with visual indicators
+
+#### Athlete Cards
+- **Quick Descriptions**: Brief, engaging summaries
+- **Visual Design**: Consistent with app theme
+- **Hover Effects**: Interactive feedback
+- **Click Actions**: Direct navigation to story view
+
+#### Navigation Flow
+1. User clicks "Suggest a Sports Hero" button
+2. Modal opens with sport categories
+3. User selects sport or searches
+4. Athlete list displays with descriptions
+5. User clicks athlete to read story
+6. Modal closes, story view opens
+7. Full integration with quiz and progress systems
+
+### 📊 Content Quality Standards
+
+#### Story Content
+- **Age-Appropriate**: Written for elementary school level
+- **Inspirational**: Focus on perseverance and hard work
+- **Educational**: Historical context and achievements
+- **Length**: 200-400 words per story
+- **Themes**: Overcoming challenges, dedication, teamwork
+
+#### Quiz Questions
+- **Comprehension-Based**: Test story understanding
+- **Multiple Choice**: 4 options per question
+- **Difficulty**: Appropriate for target age group
+- **Variety**: Mix of factual and inferential questions
+
+### 🔄 State Management
+
+#### Modal State
+```typescript
+const [showSuggestionModal, setShowSuggestionModal] = useState(false);
+const [selectedSport, setSelectedSport] = useState<string>('');
+const [searchQuery, setSearchQuery] = useState('');
+```
+
+#### Data Flow
+1. **Modal Open**: `setShowSuggestionModal(true)`
+2. **Sport Selection**: Updates `selectedSport` and shows filtered athletes
+3. **Athlete Selection**: Calls `handleSuggestedAthleteSelect(athlete)`
+4. **Modal Close**: Resets state and closes modal
+5. **Story View**: Integrates with existing story display logic
+
+### 🎯 Testing Completed
+
+#### Functional Testing
+- ✅ Modal opens/closes correctly
+- ✅ Sport category filtering works
+- ✅ Search functionality operational
+- ✅ Athlete selection navigates to story
+- ✅ Quiz integration functional
+- ✅ Progress tracking works with suggested athletes
+
+#### UI/UX Testing
+- ✅ Responsive design on mobile/desktop
+- ✅ Consistent theme and styling
+- ✅ Smooth animations and transitions
+- ✅ Accessibility considerations
+- ✅ Loading states and error handling
+
+#### Integration Testing
+- ✅ Works with existing athlete system
+- ✅ Progress tracking integration
+- ✅ WordPress API compatibility
+- ✅ TypeScript type safety
+
+### 🚀 Deployment Notes
+
+#### Git Commit Information
+- **Commit Hash**: 13395f4
+- **Branch**: main
+- **Files Changed**: 5 files (715 insertions, 31 deletions)
+- **Status**: Successfully pushed to repository
+
+#### Production Considerations
+- All new content is static (no external API calls)
+- No additional environment variables required
+- Maintains existing security model
+- Compatible with current WordPress integration
+
+### 🔮 Future Enhancement Opportunities
+
+#### Short Term
+- Add more athletes to existing sports
+- Include additional sports (tennis, swimming, etc.)
+- Add athlete photos/videos
+- Implement user favorites system
+
+#### Medium Term
+- User-submitted athlete suggestions
+- Admin interface for content management
+- Multilingual support
+- Advanced search filters
+
+#### Long Term
+- AI-powered story generation
+- Interactive athlete timelines
+- Virtual reality experiences
+- Gamification elements
+
+### 🛠️ Developer Notes
+
+#### Code Organization
+- **Modular Design**: Separate data and component files
+- **Reusable Components**: Modal can be extended for other features
+- **Type Safety**: Full TypeScript coverage
+- **Performance**: Efficient filtering and state management
+
+#### Maintenance Guidelines
+- **Adding Athletes**: Update `suggestedAthletes.ts` with new entries
+- **UI Changes**: Modify `SuggestionModal.tsx` component
+- **Integration**: Ensure ID ranges don't conflict (suggested athletes use 101+)
+- **Testing**: Verify modal state management and navigation flow
+
+#### Dependencies
+- No new external dependencies added
+- Uses existing Lucide React icons
+- Leverages current Tailwind CSS classes
+- Compatible with Next.js 15.3.3
+
+---
+
 **Last Updated**: June 8, 2025
-**Status**: Ready for WordPress plugin installation and production deployment
+**Status**: Athlete Suggestion System fully implemented and deployed
+**Next Phase**: Ready for WordPress plugin installation and production deployment
