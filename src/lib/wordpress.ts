@@ -197,6 +197,77 @@ class WordPressAPI {
       throw error;
     }
   }
+
+  // Reset user password
+  async resetPassword(usernameOrEmail: string): Promise<{ success: boolean; message: string }> {
+    try {
+      // First, find the user by username or email
+      const users = await this.makeRequest('users');
+      const user = users.find((u: { slug: string; name: string; email: string }) => 
+        u.slug === usernameOrEmail || 
+        u.name === usernameOrEmail || 
+        u.email === usernameOrEmail
+      );
+
+      if (!user) {
+        return {
+          success: false,
+          message: 'User not found. Please check your username or email.'
+        };
+      }
+
+      // Generate a temporary password
+      const tempPassword = this.generateTempPassword();
+
+      // Update the user's password
+      await this.makeRequest(`users/${user.id}`, {
+        method: 'POST',
+        body: JSON.stringify({
+          password: tempPassword
+        }),
+      });
+
+      // In a real implementation, you would send an email here
+      // For now, we'll return the temporary password
+      return {
+        success: true,
+        message: `Password reset successful! Your temporary password is: ${tempPassword}\n\nPlease log in with this temporary password and change it immediately.`
+      };
+
+    } catch (error) {
+      console.error('Error resetting password:', error);
+      return {
+        success: false,
+        message: 'Password reset failed. Please try again or contact support.'
+      };
+    }
+  }
+
+  // Generate a temporary password
+  private generateTempPassword(): string {
+    const chars = 'ABCDEFGHJKMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789';
+    let password = '';
+    for (let i = 0; i < 8; i++) {
+      password += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return password;
+  }
+
+  // Update user password (for when user wants to change from temporary password)
+  async updateUserPassword(userId: number, newPassword: string): Promise<boolean> {
+    try {
+      await this.makeRequest(`users/${userId}`, {
+        method: 'POST',
+        body: JSON.stringify({
+          password: newPassword
+        }),
+      });
+      return true;
+    } catch (error) {
+      console.error('Error updating password:', error);
+      return false;
+    }
+  }
 }
 
 export const wordpressAPI = new WordPressAPI();

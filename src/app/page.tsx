@@ -93,6 +93,19 @@ export default function Home() {
     }
   };
 
+  const handlePasswordReset = async (usernameOrEmail: string): Promise<{ success: boolean; message: string }> => {
+    try {
+      const result = await wordpressAPI.resetPassword(usernameOrEmail);
+      return result;
+    } catch (error) {
+      console.error('Password reset error:', error);
+      return {
+        success: false,
+        message: 'Password reset failed. Please try again or contact support.'
+      };
+    }
+  };
+
   const handleLogout = () => {
     setUser(null);
     localStorage.removeItem('sportsHeroesUser');
@@ -176,7 +189,7 @@ export default function Home() {
 
   // Show login form if not authenticated
   if (!user) {
-    return <LoginForm onLogin={handleLogin} onRegister={handleRegister} />;
+    return <LoginForm onLogin={handleLogin} onRegister={handleRegister} onPasswordReset={handlePasswordReset} />;
   }
 
   // Main navigation header

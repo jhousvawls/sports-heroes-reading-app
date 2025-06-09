@@ -135,5 +135,125 @@ LeBron shows us that success means helping others. Even though he is famous and 
         explanation: "LeBron went straight from high school to the NBA when he was 18 years old, which is very rare."
       }
     ]
+  },
+  {
+    id: 4,
+    name: "Simone Biles",
+    sport: "Gymnastics",
+    image: "🤸‍♀️",
+    story: `Simone Biles is the greatest gymnast of all time. She can do amazing flips and jumps that seem impossible to most people.
+
+Simone was born in Ohio in 1997. When she was young, her life was difficult. Her birth mother couldn't take care of her, so her grandparents adopted her and her sister. Her grandparents became her mom and dad and gave her lots of love.
+
+Simone discovered gymnastics when she was 6 years old during a field trip. She was naturally good at flipping and jumping. Her coaches saw that she had special talent and encouraged her to keep practicing.
+
+Simone worked incredibly hard. She practiced gymnastics for many hours every day. She learned to do moves that were so difficult, some of them are named after her! When a gymnast creates a new move, it gets their name.
+
+At the Olympics, Simone won many gold medals. She became famous around the world for her amazing skills. But she also became famous for something else - speaking up about mental health.
+
+Simone taught everyone that it's okay to take care of your mind, not just your body. She showed that even the strongest athletes need to rest and take care of themselves. She is brave both in gymnastics and in life.`,
+    questions: [
+      {
+        id: 1,
+        question: "How old was Simone when she discovered gymnastics?",
+        options: ["4", "6", "8", "10"],
+        correct: "6",
+        explanation: "Simone discovered gymnastics when she was 6 years old during a school field trip."
+      },
+      {
+        id: 2,
+        question: "What makes some of Simone's gymnastics moves special?",
+        options: ["They are easy to do", "They are named after her", "She learned them quickly", "They don't require practice"],
+        correct: "They are named after her",
+        explanation: "Some of Simone's moves are so difficult and unique that they are officially named after her in gymnastics."
+      },
+      {
+        id: 3,
+        question: "What important lesson did Simone teach about mental health?",
+        options: ["Ignore your feelings", "Only focus on winning", "It's okay to take care of your mind", "Mental health doesn't matter"],
+        correct: "It's okay to take care of your mind",
+        explanation: "Simone showed that taking care of your mental health is just as important as taking care of your body."
+      }
+    ]
+  },
+  {
+    id: 5,
+    name: "Lionel Messi",
+    sport: "Soccer",
+    image: "⚽",
+    story: `Lionel Messi is one of the best soccer players in the world. He is small in size but has huge talent and an even bigger heart.
+
+Messi was born in Argentina in 1987. When he was young, he loved playing soccer more than anything else. But there was a problem - Messi was much smaller than other kids his age. Doctors said he had a condition that made him grow very slowly.
+
+His family didn't have enough money to pay for the medicine Messi needed to grow. This made Messi very sad because he thought he might never be able to play professional soccer.
+
+When Messi was 13, a famous soccer team in Spain called Barcelona saw how talented he was. They offered to pay for his medicine and let him join their youth team. Messi and his family moved to Spain, far from home.
+
+Living in a new country was hard. Messi missed his friends and family in Argentina. But he never stopped working hard. He practiced every day and got better and better at soccer.
+
+Messi became one of the greatest players ever. He won many championships and scored hundreds of goals. He proved that being small doesn't stop you from achieving big dreams. He shows us that talent, hard work, and never giving up can overcome any obstacle.`,
+    questions: [
+      {
+        id: 1,
+        question: "What challenge did Messi face when he was young?",
+        options: ["He was too tall", "He was much smaller than other kids", "He didn't like soccer", "He lived too far from school"],
+        correct: "He was much smaller than other kids",
+        explanation: "Messi had a condition that made him grow very slowly, making him much smaller than other children his age."
+      },
+      {
+        id: 2,
+        question: "Which team helped Messi when he was 13?",
+        options: ["Real Madrid", "Barcelona", "Manchester United", "Bayern Munich"],
+        correct: "Barcelona",
+        explanation: "Barcelona saw Messi's talent and offered to pay for his medicine and let him join their youth team."
+      },
+      {
+        id: 3,
+        question: "What does Messi's story teach us?",
+        options: ["Only tall people can play soccer", "Give up when things are hard", "Talent and hard work can overcome obstacles", "Money is the most important thing"],
+        correct: "Talent and hard work can overcome obstacles",
+        explanation: "Messi's story shows that with talent, hard work, and determination, you can overcome any challenge."
+      }
+    ]
+  },
+  {
+    id: 6,
+    name: "Muhammad Ali",
+    sport: "Boxing",
+    image: "🥊",
+    story: `Muhammad Ali was not just a great boxer - he was a hero who stood up for what he believed in. He showed the world that athletes can be brave both inside and outside the ring.
+
+Ali was born in Kentucky in 1942. His real name was Cassius Clay. When he was 12, someone stole his bicycle. He was so angry that he told a police officer he wanted to fight the thief. The officer said, "You better learn how to fight first," and took him to a boxing gym.
+
+Ali discovered he was naturally good at boxing. He was fast with his hands and even faster with his feet. He would "float like a butterfly and sting like a bee," as he liked to say. He also loved to talk and would tell everyone he was "the greatest."
+
+Ali won a gold medal at the Olympics when he was 18. He became the heavyweight champion of the world three times. But what made Ali truly special was his courage outside of boxing.
+
+During a war, Ali refused to fight because he believed the war was wrong. This was a very brave thing to do. Many people were angry with him, and he lost his boxing titles. But Ali stood by his beliefs.
+
+Later, people realized Ali was right to stand up for what he believed. He became a symbol of courage and doing what's right, even when it's hard. Ali taught us that being strong means standing up for your beliefs.`,
+    questions: [
+      {
+        id: 1,
+        question: "What was Muhammad Ali's real name?",
+        options: ["Muhammad Ali", "Cassius Clay", "Joe Frazier", "George Foreman"],
+        correct: "Cassius Clay",
+        explanation: "Muhammad Ali was born with the name Cassius Clay and later changed his name to Muhammad Ali."
+      },
+      {
+        id: 2,
+        question: "How did Ali first discover boxing?",
+        options: ["His dad taught him", "He saw it on TV", "Someone stole his bicycle", "He joined a school team"],
+        correct: "Someone stole his bicycle",
+        explanation: "When someone stole Ali's bicycle, he wanted to fight the thief, and a police officer took him to learn boxing first."
+      },
+      {
+        id: 3,
+        question: "What important lesson did Ali teach about courage?",
+        options: ["Only fight when you're angry", "Always do what others want", "Stand up for your beliefs even when it's hard", "Winning is everything"],
+        correct: "Stand up for your beliefs even when it's hard",
+        explanation: "Ali showed great courage by standing up for his beliefs about war, even though it cost him his boxing titles."
+      }
+    ]
   }
 ];
