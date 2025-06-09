@@ -57,23 +57,23 @@ export default function QuizComponent({ questions, onComplete, onRestart }: Quiz
     const percentage = Math.round((finalScore / questions.length) * 100);
     
     return (
-      <div className="bg-white rounded-xl shadow-lg p-8 text-center">
-        <div className="text-6xl mb-4">
+      <div className="bg-dark-card rounded-xl shadow-lg p-4 sm:p-6 lg:p-8 text-center">
+        <div className="text-5xl sm:text-6xl mb-3 sm:mb-4">
           {percentage >= 80 ? '🏆' : percentage >= 60 ? '⭐' : '👍'}
         </div>
-        <h2 className="text-3xl font-bold text-gray-800 mb-4">Quiz Complete!</h2>
-        <div className="text-xl text-gray-600 mb-6">
-          You got <span className="font-bold text-green-600">{finalScore}</span> out of{' '}
-          <span className="font-bold">{questions.length}</span> questions correct!
+        <h2 className="text-2xl sm:text-3xl font-bold text-white mb-3 sm:mb-4">Quiz Complete!</h2>
+        <div className="text-lg sm:text-xl text-secondary mb-4 sm:mb-6">
+          You got <span className="font-bold text-green-400">{finalScore}</span> out of{' '}
+          <span className="font-bold text-white">{questions.length}</span> questions correct!
         </div>
-        <div className="text-lg text-gray-500 mb-8">
+        <div className="text-base sm:text-lg text-secondary mb-6 sm:mb-8">
           That&apos;s {percentage}%! {percentage >= 80 ? 'Excellent work!' : percentage >= 60 ? 'Good job!' : 'Keep practicing!'}
         </div>
         <button
           onClick={handleRestart}
-          className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-8 rounded-full transition-colors duration-200 text-lg flex items-center gap-2 mx-auto"
+          className="bg-tennessee-orange hover:bg-tennessee-orange-dark text-white font-bold py-3 px-6 sm:px-8 rounded-full transition-colors duration-200 text-base sm:text-lg flex items-center gap-2 mx-auto w-full sm:w-auto justify-center"
         >
-          <RotateCcw className="w-5 h-5" />
+          <RotateCcw className="w-4 h-4 sm:w-5 sm:h-5" />
           Try Again
         </button>
       </div>
@@ -84,41 +84,41 @@ export default function QuizComponent({ questions, onComplete, onRestart }: Quiz
   const isCorrect = selectedAnswer === question.correct;
 
   return (
-    <div className="bg-white rounded-xl shadow-lg p-8">
-      <div className="mb-6">
-        <div className="flex justify-between items-center mb-4">
-          <span className="text-sm font-semibold text-gray-500">
+    <div className="bg-dark-card rounded-xl shadow-lg p-4 sm:p-6 lg:p-8">
+      <div className="mb-4 sm:mb-6">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-0 mb-3 sm:mb-4">
+          <span className="text-xs sm:text-sm font-semibold text-secondary">
             Question {currentQuestion + 1} of {questions.length}
           </span>
-          <span className="text-sm font-semibold text-blue-600">
+          <span className="text-xs sm:text-sm font-semibold text-tennessee-orange">
             Score: {score}/{questions.length}
           </span>
         </div>
-        <div className="w-full bg-gray-200 rounded-full h-2">
+        <div className="w-full bg-smokey-gray rounded-full h-2">
           <div
-            className="bg-blue-500 h-2 rounded-full transition-all duration-300"
+            className="bg-tennessee-orange h-2 rounded-full transition-all duration-300"
             style={{ width: `${((currentQuestion + 1) / questions.length) * 100}%` }}
           ></div>
         </div>
       </div>
 
-      <h3 className="text-2xl font-bold text-gray-800 mb-6">{question.question}</h3>
+      <h3 className="text-xl sm:text-2xl font-bold text-white mb-4 sm:mb-6 leading-tight">{question.question}</h3>
 
-      <div className="space-y-3 mb-6">
+      <div className="space-y-3 mb-4 sm:mb-6">
         {question.options.map((option, index) => {
-          let buttonClass = "w-full p-4 text-left rounded-lg border-2 transition-all duration-200 ";
+          let buttonClass = "w-full p-3 sm:p-4 text-left rounded-lg border-2 transition-all duration-200 ";
           
           if (!showExplanation) {
             buttonClass += selectedAnswer === option
-              ? "border-blue-500 bg-blue-50 text-blue-700"
-              : "border-gray-200 hover:border-gray-300 hover:bg-gray-50";
+              ? "border-tennessee-orange bg-smokey-gray text-tennessee-orange"
+              : "border-dark hover:border-tennessee-orange hover:bg-smokey-gray text-white";
           } else {
             if (option === question.correct) {
-              buttonClass += "border-green-500 bg-green-50 text-green-700";
+              buttonClass += "border-green-500 bg-green-900 text-green-400";
             } else if (option === selectedAnswer && option !== question.correct) {
-              buttonClass += "border-red-500 bg-red-50 text-red-700";
+              buttonClass += "border-red-500 bg-red-900 text-red-400";
             } else {
-              buttonClass += "border-gray-200 bg-gray-50 text-gray-500";
+              buttonClass += "border-dark bg-smokey-gray text-secondary";
             }
           }
 
@@ -130,12 +130,12 @@ export default function QuizComponent({ questions, onComplete, onRestart }: Quiz
               disabled={showExplanation}
             >
               <div className="flex items-center justify-between">
-                <span className="text-lg">{option}</span>
+                <span className="text-base sm:text-lg pr-2">{option}</span>
                 {showExplanation && option === question.correct && (
-                  <CheckCircle className="w-6 h-6 text-green-600" />
+                  <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-green-400 flex-shrink-0" />
                 )}
                 {showExplanation && option === selectedAnswer && option !== question.correct && (
-                  <XCircle className="w-6 h-6 text-red-600" />
+                  <XCircle className="w-5 h-5 sm:w-6 sm:h-6 text-red-400 flex-shrink-0" />
                 )}
               </div>
             </button>
@@ -144,18 +144,18 @@ export default function QuizComponent({ questions, onComplete, onRestart }: Quiz
       </div>
 
       {showExplanation && (
-        <div className={`p-4 rounded-lg mb-6 ${isCorrect ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'}`}>
+        <div className={`p-3 sm:p-4 rounded-lg mb-4 sm:mb-6 ${isCorrect ? 'bg-green-900 border border-green-500' : 'bg-red-900 border border-red-500'}`}>
           <div className="flex items-center gap-2 mb-2">
             {isCorrect ? (
-              <CheckCircle className="w-5 h-5 text-green-600" />
+              <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-green-400 flex-shrink-0" />
             ) : (
-              <XCircle className="w-5 h-5 text-red-600" />
+              <XCircle className="w-4 h-4 sm:w-5 sm:h-5 text-red-400 flex-shrink-0" />
             )}
-            <span className={`font-semibold ${isCorrect ? 'text-green-700' : 'text-red-700'}`}>
+            <span className={`font-semibold text-sm sm:text-base ${isCorrect ? 'text-green-400' : 'text-red-400'}`}>
               {isCorrect ? 'Correct!' : 'Not quite right'}
             </span>
           </div>
-          <p className="text-gray-700">{question.explanation}</p>
+          <p className="text-sm sm:text-base text-white leading-relaxed">{question.explanation}</p>
         </div>
       )}
 
@@ -164,17 +164,17 @@ export default function QuizComponent({ questions, onComplete, onRestart }: Quiz
           <button
             onClick={handleSubmitAnswer}
             disabled={!selectedAnswer}
-            className="bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-bold py-3 px-8 rounded-full transition-colors duration-200 text-lg"
+            className="bg-tennessee-orange hover:bg-tennessee-orange-dark disabled:bg-smokey-gray disabled:cursor-not-allowed text-white font-bold py-3 px-6 sm:px-8 rounded-full transition-colors duration-200 text-base sm:text-lg w-full sm:w-auto"
           >
             Submit Answer
           </button>
         ) : (
           <button
             onClick={handleNextQuestion}
-            className="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-8 rounded-full transition-colors duration-200 text-lg flex items-center gap-2"
+            className="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 sm:px-8 rounded-full transition-colors duration-200 text-base sm:text-lg flex items-center gap-2 w-full sm:w-auto justify-center"
           >
             {currentQuestion + 1 < questions.length ? 'Next Question' : 'Finish Quiz'}
-            <ArrowRight className="w-5 h-5" />
+            <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" />
           </button>
         )}
       </div>

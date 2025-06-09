@@ -32,7 +32,7 @@ class WordPressAPI {
   }
 
   private async makeRequest(endpoint: string, options: RequestInit = {}) {
-    const url = `${this.baseUrl}/wp-json/wp/v2/${endpoint}`;
+    const url = `${this.baseUrl}/index.php?rest_route=/wp/v2/${endpoint}`;
     const auth = btoa(`${this.username}:${this.password}`);
     
     const response = await fetch(url, {
@@ -85,8 +85,21 @@ class WordPressAPI {
   // Get user by username
   async getUser(username: string): Promise<WordPressUser | null> {
     try {
-      const users = await this.makeRequest(`users?search=${username}`);
-      return users.length > 0 ? users[0] : null;
+      // First try to get all users and find by slug/username
+      const users = await this.makeRequest('users');
+      const user = users.find((u: any) => u.slug === username || u.name === username);
+      
+      if (user) {
+        return {
+          id: user.id,
+          username: user.slug,
+          email: user.email || '',
+          first_name: user.first_name || '',
+          last_name: user.last_name || ''
+        };
+      }
+      
+      return null;
     } catch (error) {
       console.error('Error fetching user:', error);
       return null;

@@ -5,9 +5,10 @@ import { athletes, Athlete } from '@/data/athletes';
 import AthleteCard from '@/components/AthleteCard';
 import QuizComponent from '@/components/QuizComponent';
 import LoginForm from '@/components/LoginForm';
+import PrintPreview from '@/components/PrintPreview';
 import { useProgress } from '@/hooks/useProgress';
 import { wordpressAPI, WordPressUser } from '@/lib/wordpress';
-import { ArrowLeft, Volume2, VolumeX, Home as HomeIcon, LogOut, User, Trophy, Clock } from 'lucide-react';
+import { ArrowLeft, Volume2, VolumeX, Home as HomeIcon, LogOut, User, Trophy, Clock, Printer, FileText } from 'lucide-react';
 
 type ViewState = 'home' | 'story' | 'quiz' | 'progress';
 
@@ -26,6 +27,7 @@ export default function Home() {
   const [user, setUser] = useState<WordPressUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [storyStartTime, setStoryStartTime] = useState<number | null>(null);
+  const [showPrintPreview, setShowPrintPreview] = useState(false);
 
   const { 
     saveStoryRead, 
@@ -131,13 +133,21 @@ export default function Home() {
     }
   };
 
+  const handlePrint = () => {
+    window.print();
+  };
+
+  const handlePrintPreview = () => {
+    setShowPrintPreview(true);
+  };
+
   // Show loading screen
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <div className="text-6xl mb-4">🏆</div>
-          <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+          <div className="w-8 h-8 border-4 border-tennessee-orange border-t-transparent rounded-full animate-spin mx-auto"></div>
         </div>
       </div>
     );
@@ -150,37 +160,65 @@ export default function Home() {
 
   // Main navigation header
   const renderHeader = () => (
-    <div className="bg-white shadow-sm border-b">
-      <div className="container mx-auto px-4 py-4">
+    <div className="bg-dark-card shadow-sm border-b border-dark">
+      <div className="container mx-auto px-4 py-3 sm:py-4">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="text-2xl">🏆</div>
-            <h1 className="text-xl font-bold text-gray-800">Sports Heroes</h1>
+          <div className="flex items-center gap-2 sm:gap-4">
+            <div className="text-xl sm:text-2xl">🏆</div>
+            <h1 className="text-lg sm:text-xl font-bold text-white">Sports Heroes</h1>
           </div>
           
-          <div className="flex items-center gap-4">
+          {/* Desktop Navigation */}
+          <div className="hidden md:flex items-center gap-4">
             <button
               onClick={() => setCurrentView('progress')}
-              className="flex items-center gap-2 px-3 py-2 text-gray-600 hover:text-gray-800 rounded-lg hover:bg-gray-100"
+              className="flex items-center gap-2 px-3 py-2 text-secondary hover:text-tennessee-orange rounded-lg hover:bg-smokey-gray"
             >
               <Trophy className="w-4 h-4" />
               Progress
             </button>
             
-            <div className="flex items-center gap-2 px-3 py-2 bg-gray-100 rounded-lg">
-              <User className="w-4 h-4 text-gray-600" />
-              <span className="text-sm font-medium text-gray-700">
+            <div className="flex items-center gap-2 px-3 py-2 bg-smokey-gray rounded-lg">
+              <User className="w-4 h-4 text-secondary" />
+              <span className="text-sm font-medium text-white">
                 {user.first_name} {user.last_name}
               </span>
             </div>
             
             <button
               onClick={handleLogout}
-              className="flex items-center gap-2 px-3 py-2 text-red-600 hover:text-red-800 rounded-lg hover:bg-red-50"
+              className="flex items-center gap-2 px-3 py-2 text-red-400 hover:text-red-300 rounded-lg hover:bg-red-900"
             >
               <LogOut className="w-4 h-4" />
               Logout
             </button>
+          </div>
+
+          {/* Mobile Navigation */}
+          <div className="flex md:hidden items-center gap-2">
+            <button
+              onClick={() => setCurrentView('progress')}
+              className="flex items-center justify-center w-10 h-10 text-secondary hover:text-tennessee-orange rounded-lg hover:bg-smokey-gray"
+              title="Progress"
+            >
+              <Trophy className="w-5 h-5" />
+            </button>
+            
+            <button
+              onClick={handleLogout}
+              className="flex items-center justify-center w-10 h-10 text-red-400 hover:text-red-300 rounded-lg hover:bg-red-900"
+              title="Logout"
+            >
+              <LogOut className="w-5 h-5" />
+            </button>
+          </div>
+        </div>
+        
+        {/* Mobile User Info */}
+        <div className="md:hidden mt-2 pt-2 border-t border-dark">
+          <div className="flex items-center gap-2 text-sm text-secondary">
+            <User className="w-4 h-4" />
+            <span>{user.first_name} {user.last_name}</span>
           </div>
         </div>
       </div>
@@ -190,55 +228,56 @@ export default function Home() {
   // Progress view
   if (currentView === 'progress') {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50">
+      <div className="min-h-screen bg-background">
         {renderHeader()}
-        <div className="container mx-auto px-4 py-8">
+        <div className="container mx-auto px-4 py-6 sm:py-8">
           <div className="max-w-4xl mx-auto">
-            <div className="flex items-center gap-2 mb-8">
+            <div className="flex items-center gap-2 mb-6 sm:mb-8">
               <button
                 onClick={handleBackToHome}
-                className="flex items-center gap-2 text-blue-600 hover:text-blue-800 font-semibold"
+                className="flex items-center gap-2 text-tennessee-orange hover:text-white font-semibold"
               >
                 <ArrowLeft className="w-5 h-5" />
-                Back to Athletes
+                <span className="hidden sm:inline">Back to Athletes</span>
+                <span className="sm:hidden">Back</span>
               </button>
             </div>
 
-            <div className="bg-white rounded-xl shadow-lg p-8">
-              <h2 className="text-3xl font-bold text-gray-800 mb-6">Your Reading Progress</h2>
+            <div className="bg-dark-card rounded-xl shadow-lg p-4 sm:p-6 lg:p-8">
+              <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4 sm:mb-6">Your Reading Progress</h2>
               
-              <div className="grid gap-6">
+              <div className="grid gap-4 sm:gap-6">
                 {athletes.map((athlete) => {
                   const athleteProgress = getAthleteProgress(athlete.id);
                   return (
-                    <div key={athlete.id} className="border border-gray-200 rounded-lg p-6">
-                      <div className="flex items-center gap-4 mb-4">
-                        <div className="text-4xl">{athlete.image}</div>
-                        <div>
-                          <h3 className="text-xl font-bold text-gray-800">{athlete.name}</h3>
-                          <p className="text-gray-600">{athlete.sport}</p>
+                    <div key={athlete.id} className="border border-dark rounded-lg p-4 sm:p-6 bg-smokey-gray">
+                      <div className="flex items-center gap-3 sm:gap-4 mb-3 sm:mb-4">
+                        <div className="text-3xl sm:text-4xl">{athlete.image}</div>
+                        <div className="min-w-0 flex-1">
+                          <h3 className="text-lg sm:text-xl font-bold text-white truncate">{athlete.name}</h3>
+                          <p className="text-sm sm:text-base text-secondary">{athlete.sport}</p>
                         </div>
                       </div>
                       
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                         <div className="flex items-center gap-2">
-                          <div className={`w-3 h-3 rounded-full ${athleteProgress?.story_read ? 'bg-green-500' : 'bg-gray-300'}`}></div>
-                          <span className="text-sm text-gray-600">
+                          <div className={`w-3 h-3 rounded-full flex-shrink-0 ${athleteProgress?.story_read ? 'bg-green-500' : 'bg-gray-500'}`}></div>
+                          <span className="text-sm text-secondary">
                             Story {athleteProgress?.story_read ? 'Read' : 'Not Read'}
                           </span>
                         </div>
                         
                         <div className="flex items-center gap-2">
-                          <div className={`w-3 h-3 rounded-full ${athleteProgress?.quiz_completed ? 'bg-green-500' : 'bg-gray-300'}`}></div>
-                          <span className="text-sm text-gray-600">
+                          <div className={`w-3 h-3 rounded-full flex-shrink-0 ${athleteProgress?.quiz_completed ? 'bg-tennessee-orange' : 'bg-gray-500'}`}></div>
+                          <span className="text-sm text-secondary">
                             Quiz {athleteProgress?.quiz_completed ? `${athleteProgress.quiz_score}/${athleteProgress.total_questions}` : 'Not Taken'}
                           </span>
                         </div>
                         
                         {athleteProgress?.time_spent_reading && (
-                          <div className="flex items-center gap-2">
-                            <Clock className="w-3 h-3 text-gray-500" />
-                            <span className="text-sm text-gray-600">
+                          <div className="flex items-center gap-2 sm:col-span-2 lg:col-span-1">
+                            <Clock className="w-3 h-3 text-secondary flex-shrink-0" />
+                            <span className="text-sm text-secondary">
                               {Math.round(athleteProgress.time_spent_reading / 60)} min read
                             </span>
                           </div>
@@ -258,19 +297,19 @@ export default function Home() {
   // Home view
   if (currentView === 'home') {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50">
+      <div className="min-h-screen bg-background">
         {renderHeader()}
-        <div className="container mx-auto px-4 py-8">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold text-gray-800 mb-4">
+        <div className="container mx-auto px-4 py-6 sm:py-8">
+          <div className="text-center mb-8 sm:mb-12">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-3 sm:mb-4">
               Choose Your Sports Hero
             </h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+            <p className="text-lg sm:text-xl text-secondary max-w-2xl mx-auto px-2">
               Read amazing stories about your favorite athletes and test your understanding with fun quizzes!
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 max-w-6xl mx-auto">
             {athletes.map((athlete) => {
               const athleteProgress = getAthleteProgress(athlete.id);
               return (
@@ -287,7 +326,7 @@ export default function Home() {
                         </div>
                       )}
                       {athleteProgress.quiz_completed && (
-                        <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
+                        <div className="w-6 h-6 bg-tennessee-orange rounded-full flex items-center justify-center">
                           <span className="text-white text-xs">✓</span>
                         </div>
                       )}
@@ -305,42 +344,74 @@ export default function Home() {
   // Story view
   if (currentView === 'story' && selectedAthlete) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50">
+      <div className="min-h-screen bg-background">
         {renderHeader()}
-        <div className="container mx-auto px-4 py-8">
+        <div className="container mx-auto px-4 py-6 sm:py-8">
           <div className="max-w-4xl mx-auto">
-            <div className="flex items-center justify-between mb-8">
-              <button
-                onClick={handleBackToHome}
-                className="flex items-center gap-2 text-blue-600 hover:text-blue-800 font-semibold"
-              >
-                <ArrowLeft className="w-5 h-5" />
-                Back to Athletes
-              </button>
-              
-              <button
-                onClick={toggleReading}
-                className={`flex items-center gap-2 px-4 py-2 rounded-full font-semibold transition-colors ${
-                  isReading 
-                    ? 'bg-red-500 hover:bg-red-600 text-white' 
-                    : 'bg-green-500 hover:bg-green-600 text-white'
-                }`}
-              >
-                {isReading ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
-                {isReading ? 'Stop Reading' : 'Read Aloud'}
-              </button>
+            <div className="flex flex-col gap-4 mb-6 sm:mb-8">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <button
+                  onClick={handleBackToHome}
+                  className="flex items-center gap-2 text-tennessee-orange hover:text-white font-semibold"
+                >
+                  <ArrowLeft className="w-5 h-5" />
+                  <span className="hidden sm:inline">Back to Athletes</span>
+                  <span className="sm:hidden">Back</span>
+                </button>
+                
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    onClick={toggleReading}
+                    className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-full font-semibold transition-colors text-sm sm:text-base ${
+                      isReading 
+                        ? 'bg-red-500 hover:bg-red-600 text-white' 
+                        : 'bg-green-500 hover:bg-green-600 text-white'
+                    }`}
+                  >
+                    {isReading ? <VolumeX className="w-4 h-4 sm:w-5 sm:h-5" /> : <Volume2 className="w-4 h-4 sm:w-5 sm:h-5" />}
+                    <span className="hidden sm:inline">{isReading ? 'Stop Reading' : 'Read Aloud'}</span>
+                    <span className="sm:hidden">{isReading ? 'Stop' : 'Listen'}</span>
+                  </button>
+                  
+                  <button
+                    onClick={handlePrint}
+                    className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-full font-semibold transition-colors text-sm sm:text-base"
+                  >
+                    <Printer className="w-4 h-4 sm:w-5 sm:h-5" />
+                    <span className="hidden sm:inline">Print</span>
+                  </button>
+                  
+                  <button
+                    onClick={handlePrintPreview}
+                    className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-full font-semibold transition-colors text-sm sm:text-base"
+                  >
+                    <FileText className="w-4 h-4 sm:w-5 sm:h-5" />
+                    <span className="hidden sm:inline">Print Preview</span>
+                    <span className="sm:hidden">Preview</span>
+                  </button>
+                </div>
+              </div>
             </div>
 
-            <div className="bg-white rounded-xl shadow-lg p-8 mb-8">
-              <div className="text-center mb-8">
-                <div className="text-8xl mb-4">{selectedAthlete.image}</div>
-                <h1 className="text-4xl font-bold text-gray-800 mb-2">{selectedAthlete.name}</h1>
-                <p className="text-xl text-gray-600">{selectedAthlete.sport} Player</p>
+            <div className="bg-dark-card rounded-xl shadow-lg p-4 sm:p-6 lg:p-8 mb-6 sm:mb-8">
+              {/* Print Header - Hidden on screen, visible when printing */}
+              <div className="print-only print-story-header">
+                <div className="print-story-title">{selectedAthlete.name}</div>
+                <div className="print-story-subtitle">{selectedAthlete.sport} Player</div>
               </div>
 
-              <div className="prose prose-lg max-w-none">
+              <div className="text-center mb-6 sm:mb-8 screen-only">
+                <div className="text-6xl sm:text-7xl lg:text-8xl mb-3 sm:mb-4 print-athlete-image">{selectedAthlete.image}</div>
+                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-2">{selectedAthlete.name}</h1>
+                <p className="text-lg sm:text-xl text-secondary">{selectedAthlete.sport} Player</p>
+              </div>
+
+              {/* Print-only athlete image */}
+              <div className="print-only print-athlete-image">{selectedAthlete.image}</div>
+
+              <div className="prose prose-sm sm:prose-base lg:prose-lg max-w-none print-story-content">
                 {selectedAthlete.story.split('\n\n').map((paragraph, index) => (
-                  <p key={index} className="text-gray-700 leading-relaxed mb-4 text-lg">
+                  <p key={index} className="text-white leading-relaxed mb-4 text-base sm:text-lg">
                     {paragraph}
                   </p>
                 ))}
@@ -350,13 +421,21 @@ export default function Home() {
             <div className="text-center">
               <button
                 onClick={handleStartQuiz}
-                className="bg-green-500 hover:bg-green-600 text-white font-bold py-4 px-8 rounded-full text-xl transition-colors duration-200 shadow-lg"
+                className="bg-tennessee-orange hover:bg-tennessee-orange-dark text-white font-bold py-3 px-6 sm:py-4 sm:px-8 rounded-full text-lg sm:text-xl transition-colors duration-200 shadow-lg w-full sm:w-auto"
               >
                 Take the Quiz! 🧠
               </button>
             </div>
           </div>
         </div>
+        
+        {/* Print Preview Modal */}
+        {showPrintPreview && selectedAthlete && (
+          <PrintPreview
+            athlete={selectedAthlete}
+            onClose={() => setShowPrintPreview(false)}
+          />
+        )}
       </div>
     );
   }
@@ -364,33 +443,35 @@ export default function Home() {
   // Quiz view
   if (currentView === 'quiz' && selectedAthlete) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50">
+      <div className="min-h-screen bg-background">
         {renderHeader()}
-        <div className="container mx-auto px-4 py-8">
+        <div className="container mx-auto px-4 py-6 sm:py-8">
           <div className="max-w-3xl mx-auto">
-            <div className="flex items-center justify-between mb-8">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 sm:mb-8">
               <button
                 onClick={handleBackToStory}
-                className="flex items-center gap-2 text-blue-600 hover:text-blue-800 font-semibold"
+                className="flex items-center gap-2 text-tennessee-orange hover:text-white font-semibold"
               >
                 <ArrowLeft className="w-5 h-5" />
-                Back to Story
+                <span className="hidden sm:inline">Back to Story</span>
+                <span className="sm:hidden">Back</span>
               </button>
               
               <button
                 onClick={handleBackToHome}
-                className="flex items-center gap-2 text-gray-600 hover:text-gray-800 font-semibold"
+                className="flex items-center gap-2 text-secondary hover:text-white font-semibold"
               >
                 <HomeIcon className="w-5 h-5" />
-                Home
+                <span className="hidden sm:inline">Home</span>
+                <span className="sm:hidden">Home</span>
               </button>
             </div>
 
-            <div className="text-center mb-8">
-              <h1 className="text-3xl font-bold text-gray-800 mb-2">
+            <div className="text-center mb-6 sm:mb-8">
+              <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">
                 {selectedAthlete.name} Quiz
               </h1>
-              <p className="text-gray-600">
+              <p className="text-sm sm:text-base text-secondary">
                 Test your understanding of the story you just read!
               </p>
             </div>
