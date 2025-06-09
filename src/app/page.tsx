@@ -17,10 +17,7 @@ type AthleteType = Athlete | SuggestedAthlete;
 
 interface RegisterData {
   username: string;
-  email: string;
   password: string;
-  firstName: string;
-  lastName: string;
 }
 
 export default function Home() {
@@ -78,10 +75,10 @@ export default function Home() {
     try {
       const newUser = await wordpressAPI.createUser({
         username: userData.username,
-        email: userData.email,
+        email: `${userData.username}@example.com`, // Generate a default email
         password: userData.password,
-        first_name: userData.firstName,
-        last_name: userData.lastName,
+        first_name: userData.username, // Use username as first name
+        last_name: 'User', // Default last name
       });
 
       setUser(newUser);

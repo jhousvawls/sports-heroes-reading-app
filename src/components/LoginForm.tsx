@@ -11,10 +11,7 @@ interface LoginFormProps {
 
 interface RegisterData {
   username: string;
-  email: string;
   password: string;
-  firstName: string;
-  lastName: string;
 }
 
 export default function LoginForm({ onLogin, onRegister, onPasswordReset }: LoginFormProps) {
@@ -33,10 +30,7 @@ export default function LoginForm({ onLogin, onRegister, onPasswordReset }: Logi
   // Register form state
   const [registerData, setRegisterData] = useState({
     username: '',
-    email: '',
-    password: '',
-    firstName: '',
-    lastName: ''
+    password: ''
   });
 
   // Password reset form state
@@ -217,35 +211,6 @@ export default function LoginForm({ onLogin, onRegister, onPasswordReset }: Logi
           </form>
         ) : (
           <form onSubmit={handleRegister} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-white mb-2">
-                  First Name
-                </label>
-                <input
-                  type="text"
-                  value={registerData.firstName}
-                  onChange={(e) => setRegisterData({ ...registerData, firstName: e.target.value })}
-                  className="w-full px-4 py-3 border border-dark bg-smokey-gray text-white rounded-lg focus:ring-2 focus:ring-tennessee-orange focus:border-transparent placeholder-secondary"
-                  placeholder="First name"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-white mb-2">
-                  Last Name
-                </label>
-                <input
-                  type="text"
-                  value={registerData.lastName}
-                  onChange={(e) => setRegisterData({ ...registerData, lastName: e.target.value })}
-                  className="w-full px-4 py-3 border border-dark bg-smokey-gray text-white rounded-lg focus:ring-2 focus:ring-tennessee-orange focus:border-transparent placeholder-secondary"
-                  placeholder="Last name"
-                  required
-                />
-              </div>
-            </div>
-
             <div>
               <label className="block text-sm font-medium text-white mb-2">
                 Username
@@ -258,23 +223,6 @@ export default function LoginForm({ onLogin, onRegister, onPasswordReset }: Logi
                   onChange={(e) => setRegisterData({ ...registerData, username: e.target.value })}
                   className="w-full pl-10 pr-4 py-3 border border-dark bg-smokey-gray text-white rounded-lg focus:ring-2 focus:ring-tennessee-orange focus:border-transparent placeholder-secondary"
                   placeholder="Choose a username"
-                  required
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-white mb-2">
-                Email
-              </label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-secondary w-5 h-5" />
-                <input
-                  type="email"
-                  value={registerData.email}
-                  onChange={(e) => setRegisterData({ ...registerData, email: e.target.value })}
-                  className="w-full pl-10 pr-4 py-3 border border-dark bg-smokey-gray text-white rounded-lg focus:ring-2 focus:ring-tennessee-orange focus:border-transparent placeholder-secondary"
-                  placeholder="Enter your email"
                   required
                 />
               </div>
