@@ -1,115 +1,68 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useSession } from 'next-auth/react';
 import { athletes, Athlete } from '@/data/athletes';
 import { suggestedAthletes, SuggestedAthlete } from '@/data/suggestedAthletes';
 import AthleteCard from '@/components/AthleteCard';
 import QuizComponent from '@/components/QuizComponent';
-import LoginForm from '@/components/LoginForm';
+import GoogleSignIn from '@/components/GoogleSignIn';
 import PrintPreview from '@/components/PrintPreview';
 import SuggestionModal from '@/components/SuggestionModal';
 import { useProgress } from '@/hooks/useProgress';
-import { wordpressAPI, WordPressUser } from '@/lib/wordpress';
-import { ArrowLeft, Volume2, VolumeX, Home as HomeIcon, LogOut, User, Trophy, Clock, Printer, FileText, Plus, Star } from 'lucide-react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { 
+  faArrowLeft, 
+  faVolumeUp, 
+  faVolumeMute, 
+  faHome, 
+  faSignOutAlt, 
+  faUser, 
+  faTrophy, 
+  faClock, 
+  faPrint, 
+  faFileText, 
+  faPlus, 
+  faStar 
+} from '@fortawesome/free-solid-svg-icons';
 
 type ViewState = 'home' | 'story' | 'quiz' | 'progress';
 type AthleteType = Athlete | SuggestedAthlete;
 
-interface RegisterData {
-  username: string;
-  password: string;
-}
-
 export default function Home() {
+  const { data: session, status } = useSession();
   const [currentView, setCurrentView] = useState<ViewState>('home');
   const [selectedAthlete, setSelectedAthlete] = useState<AthleteType | null>(null);
   const [isReading, setIsReading] = useState(false);
-  const [user, setUser] = useState<WordPressUser | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
   const [storyStartTime, setStoryStartTime] = useState<number | null>(null);
   const [showPrintPreview, setShowPrintPreview] = useState(false);
   const [showSuggestionModal, setShowSuggestionModal] = useState(false);
+
+  // Get WordPress user ID from session
+  const wpUserId = session?.user?.wpUserId || null;
 
   const { 
     saveStoryRead, 
     saveQuizScore, 
     getAthleteProgress 
-  } = useProgress(user?.id || null);
+  } = useProgress(wpUserId);
 
-  useEffect(() => {
-    // Check for stored user session
-    const storedUser = localStorage.getItem('sportsHeroesUser');
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    } else {
-      // For testing purposes, create a mock user
-      const mockUser = {
-        id: 1,
-        username: 'testuser',
-        first_name: 'Test',
-        last_name: 'User',
-        email: 'test@example.com'
-      };
-      setUser(mockUser);
-      localStorage.setItem('sportsHeroesUser', JSON.stringify(mockUser));
-    }
-    setIsLoading(false);
-  }, []);
+  // Show loading screen while checking authentication
+  if (status === 'loading') {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-6xl mb-4">🏆</div>
+          <div className="w-8 h-8 border-4 border-tennessee-orange border-t-transparent rounded-full animate-spin mx-auto"></div>
+        </div>
+      </div>
+    );
+  }
 
-  const handleLogin = async (username: string): Promise<boolean> => {
-    try {
-      const userData = await wordpressAPI.getUser(username);
-      if (userData) {
-        setUser(userData);
-        localStorage.setItem('sportsHeroesUser', JSON.stringify(userData));
-        return true;
-      }
-      return false;
-    } catch (error) {
-      console.error('Login error:', error);
-      return false;
-    }
-  };
-
-  const handleRegister = async (userData: RegisterData): Promise<boolean> => {
-    try {
-      const newUser = await wordpressAPI.createUser({
-        username: userData.username,
-        email: `${userData.username}@example.com`, // Generate a default email
-        password: userData.password,
-        first_name: userData.username, // Use username as first name
-        last_name: 'User', // Default last name
-      });
-
-      setUser(newUser);
-      localStorage.setItem('sportsHeroesUser', JSON.stringify(newUser));
-      return true;
-    } catch (error) {
-      console.error('Registration error:', error);
-      return false;
-    }
-  };
-
-  const handlePasswordReset = async (usernameOrEmail: string): Promise<{ success: boolean; message: string }> => {
-    try {
-      const result = await wordpressAPI.resetPassword(usernameOrEmail);
-      return result;
-    } catch (error) {
-      console.error('Password reset error:', error);
-      return {
-        success: false,
-        message: 'Password reset failed. Please try again or contact support.'
-      };
-    }
-  };
-
-  const handleLogout = () => {
-    setUser(null);
-    localStorage.removeItem('sportsHeroesUser');
-    setCurrentView('home');
-    setSelectedAthlete(null);
-    setIsReading(false);
-  };
+  // Show Google Sign-In if not authenticated
+  if (!session?.user) {
+    return <GoogleSignIn />;
+  }
 
   const handleAthleteSelect = (athlete: AthleteType) => {
     setSelectedAthlete(athlete);
@@ -124,7 +77,7 @@ export default function Home() {
   };
 
   const handleStartQuiz = async () => {
-    if (selectedAthlete && user && storyStartTime) {
+    if (selectedAthlete && wpUserId && storyStartTime) {
       const timeSpent = Math.round((Date.now() - storyStartTime) / 1000);
       await saveStoryRead(selectedAthlete.id, selectedAthlete.name, timeSpent);
     }
@@ -132,7 +85,7 @@ export default function Home() {
   };
 
   const handleQuizComplete = async (score: number) => {
-    if (selectedAthlete && user) {
+    if (selectedAthlete && wpUserId) {
       await saveQuizScore(selectedAthlete.id, selectedAthlete.name, score, selectedAthlete.questions.length);
       console.log(`Quiz completed with score: ${score}/${selectedAthlete.questions.length}`);
     }
@@ -172,23 +125,6 @@ export default function Home() {
     setShowPrintPreview(true);
   };
 
-  // Show loading screen
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <div className="text-6xl mb-4">🏆</div>
-          <div className="w-8 h-8 border-4 border-tennessee-orange border-t-transparent rounded-full animate-spin mx-auto"></div>
-        </div>
-      </div>
-    );
-  }
-
-  // Show login form if not authenticated
-  if (!user) {
-    return <LoginForm onLogin={handleLogin} onRegister={handleRegister} onPasswordReset={handlePasswordReset} />;
-  }
-
   // Main navigation header
   const renderHeader = () => (
     <div className="bg-dark-card shadow-sm border-b border-dark">
@@ -205,24 +141,11 @@ export default function Home() {
               onClick={() => setCurrentView('progress')}
               className="flex items-center gap-2 px-3 py-2 text-secondary hover:text-tennessee-orange rounded-lg hover:bg-smokey-gray"
             >
-              <Trophy className="w-4 h-4" />
+              <FontAwesomeIcon icon={faTrophy} className="w-4 h-4" />
               Progress
             </button>
             
-            <div className="flex items-center gap-2 px-3 py-2 bg-smokey-gray rounded-lg">
-              <User className="w-4 h-4 text-secondary" />
-              <span className="text-sm font-medium text-white">
-                {user.first_name} {user.last_name}
-              </span>
-            </div>
-            
-            <button
-              onClick={handleLogout}
-              className="flex items-center gap-2 px-3 py-2 text-red-400 hover:text-red-300 rounded-lg hover:bg-red-900"
-            >
-              <LogOut className="w-4 h-4" />
-              Logout
-            </button>
+            <GoogleSignIn />
           </div>
 
           {/* Mobile Navigation */}
@@ -232,24 +155,18 @@ export default function Home() {
               className="flex items-center justify-center w-10 h-10 text-secondary hover:text-tennessee-orange rounded-lg hover:bg-smokey-gray"
               title="Progress"
             >
-              <Trophy className="w-5 h-5" />
+              <FontAwesomeIcon icon={faTrophy} className="w-5 h-5" />
             </button>
             
-            <button
-              onClick={handleLogout}
-              className="flex items-center justify-center w-10 h-10 text-red-400 hover:text-red-300 rounded-lg hover:bg-red-900"
-              title="Logout"
-            >
-              <LogOut className="w-5 h-5" />
-            </button>
+            <GoogleSignIn />
           </div>
         </div>
         
         {/* Mobile User Info */}
         <div className="md:hidden mt-2 pt-2 border-t border-dark">
           <div className="flex items-center gap-2 text-sm text-secondary">
-            <User className="w-4 h-4" />
-            <span>{user.first_name} {user.last_name}</span>
+            <FontAwesomeIcon icon={faUser} className="w-4 h-4" />
+            <span>{session.user.name || session.user.email}</span>
           </div>
         </div>
       </div>
@@ -268,7 +185,7 @@ export default function Home() {
                 onClick={handleBackToHome}
                 className="flex items-center gap-2 text-tennessee-orange hover:text-white font-semibold"
               >
-                <ArrowLeft className="w-5 h-5" />
+                <FontAwesomeIcon icon={faArrowLeft} className="w-5 h-5" />
                 <span className="hidden sm:inline">Back to Athletes</span>
                 <span className="sm:hidden">Back</span>
               </button>
@@ -290,7 +207,7 @@ export default function Home() {
                             <h3 className="text-lg sm:text-xl font-bold text-white truncate">{athlete.name}</h3>
                             {isSuggested && (
                               <span className="bg-purple-600 text-white text-xs px-2 py-1 rounded-full font-semibold flex-shrink-0">
-                                <Star className="w-3 h-3 inline mr-1" />
+                                <FontAwesomeIcon icon={faStar} className="w-3 h-3 inline mr-1" />
                                 Suggested
                               </span>
                             )}
@@ -316,7 +233,7 @@ export default function Home() {
                         
                         {athleteProgress?.time_spent_reading && (
                           <div className="flex items-center gap-2 sm:col-span-2 lg:col-span-1">
-                            <Clock className="w-3 h-3 text-secondary flex-shrink-0" />
+                            <FontAwesomeIcon icon={faClock} className="w-3 h-3 text-secondary flex-shrink-0" />
                             <span className="text-sm text-secondary">
                               {Math.round(athleteProgress.time_spent_reading / 60)} min read
                             </span>
@@ -366,26 +283,12 @@ export default function Home() {
                 {athletes.map((athlete) => {
                   const athleteProgress = getAthleteProgress(athlete.id);
                   return (
-                    <div key={athlete.id} className="relative">
-                      <AthleteCard
-                        athlete={athlete}
-                        onSelect={handleAthleteSelect}
-                      />
-                      {athleteProgress && (
-                        <div className="absolute top-2 right-2 flex gap-1">
-                          {athleteProgress.story_read && (
-                            <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
-                              <span className="text-white text-xs">📖</span>
-                            </div>
-                          )}
-                          {athleteProgress.quiz_completed && (
-                            <div className="w-6 h-6 bg-tennessee-orange rounded-full flex items-center justify-center">
-                              <span className="text-white text-xs">✓</span>
-                            </div>
-                          )}
-                        </div>
-                      )}
-                    </div>
+                    <AthleteCard
+                      key={athlete.id}
+                      athlete={athlete}
+                      onSelect={handleAthleteSelect}
+                      progress={athleteProgress}
+                    />
                   );
                 })}
               </div>
@@ -405,7 +308,7 @@ export default function Home() {
                   onClick={() => setShowSuggestionModal(true)}
                   className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 sm:py-4 sm:px-8 rounded-full text-lg sm:text-xl transition-colors duration-200 shadow-lg flex items-center gap-3 mx-auto"
                 >
-                  <Plus className="w-5 h-5 sm:w-6 sm:h-6" />
+                  <FontAwesomeIcon icon={faPlus} className="w-5 h-5 sm:w-6 sm:h-6" />
                   Suggest a Sports Hero
                 </button>
               </div>
@@ -436,7 +339,7 @@ export default function Home() {
                   onClick={handleBackToHome}
                   className="flex items-center gap-2 text-tennessee-orange hover:text-white font-semibold"
                 >
-                  <ArrowLeft className="w-5 h-5" />
+                  <FontAwesomeIcon icon={faArrowLeft} className="w-5 h-5" />
                   <span className="hidden sm:inline">Back to Athletes</span>
                   <span className="sm:hidden">Back</span>
                 </button>
@@ -450,7 +353,7 @@ export default function Home() {
                         : 'bg-green-500 hover:bg-green-600 text-white'
                     }`}
                   >
-                    {isReading ? <VolumeX className="w-4 h-4 sm:w-5 sm:h-5" /> : <Volume2 className="w-4 h-4 sm:w-5 sm:h-5" />}
+                    <FontAwesomeIcon icon={isReading ? faVolumeMute : faVolumeUp} className="w-4 h-4 sm:w-5 sm:h-5" />
                     <span className="hidden sm:inline">{isReading ? 'Stop Reading' : 'Read Aloud'}</span>
                     <span className="sm:hidden">{isReading ? 'Stop' : 'Listen'}</span>
                   </button>
@@ -459,7 +362,7 @@ export default function Home() {
                     onClick={handlePrint}
                     className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-full font-semibold transition-colors text-sm sm:text-base"
                   >
-                    <Printer className="w-4 h-4 sm:w-5 sm:h-5" />
+                    <FontAwesomeIcon icon={faPrint} className="w-4 h-4 sm:w-5 sm:h-5" />
                     <span className="hidden sm:inline">Print</span>
                   </button>
                   
@@ -467,7 +370,7 @@ export default function Home() {
                     onClick={handlePrintPreview}
                     className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-full font-semibold transition-colors text-sm sm:text-base"
                   >
-                    <FileText className="w-4 h-4 sm:w-5 sm:h-5" />
+                    <FontAwesomeIcon icon={faFileText} className="w-4 h-4 sm:w-5 sm:h-5" />
                     <span className="hidden sm:inline">Print Preview</span>
                     <span className="sm:hidden">Preview</span>
                   </button>
@@ -541,7 +444,7 @@ export default function Home() {
                 onClick={handleBackToStory}
                 className="flex items-center gap-2 text-tennessee-orange hover:text-white font-semibold"
               >
-                <ArrowLeft className="w-5 h-5" />
+                <FontAwesomeIcon icon={faArrowLeft} className="w-5 h-5" />
                 <span className="hidden sm:inline">Back to Story</span>
                 <span className="sm:hidden">Back</span>
               </button>
@@ -550,7 +453,7 @@ export default function Home() {
                 onClick={handleBackToHome}
                 className="flex items-center gap-2 text-secondary hover:text-white font-semibold"
               >
-                <HomeIcon className="w-5 h-5" />
+                <FontAwesomeIcon icon={faHome} className="w-5 h-5" />
                 <span className="hidden sm:inline">Home</span>
                 <span className="sm:hidden">Home</span>
               </button>

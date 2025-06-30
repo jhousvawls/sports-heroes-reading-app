@@ -6,6 +6,17 @@ export interface WordPressUser {
   email: string;
   first_name: string;
   last_name: string;
+  google_id?: string;
+  picture?: string;
+}
+
+export interface GoogleUserData {
+  email: string;
+  name: string;
+  googleId: string;
+  firstName: string;
+  lastName: string;
+  picture: string;
 }
 
 export interface ProgressRecord {
@@ -103,6 +114,68 @@ class WordPressAPI {
     } catch (error) {
       console.error('Error fetching user:', error);
       return null;
+    }
+  }
+
+  // Get user by email
+  async getUserByEmail(email: string): Promise<WordPressUser | null> {
+    try {
+      const users = await this.makeRequest('users');
+      const user = users.find((u: { email: string; id: number; slug: string; first_name?: string; last_name?: string; meta?: any }) => u.email === email);
+      
+      if (user) {
+        return {
+          id: user.id,
+          username: user.slug,
+          email: user.email,
+          first_name: user.first_name || '',
+          last_name: user.last_name || '',
+          google_id: user.meta?.google_id || '',
+          picture: user.meta?.picture || ''
+        };
+      }
+      
+      return null;
+    } catch (error) {
+      console.error('Error fetching user by email:', error);
+      return null;
+    }
+  }
+
+  // Create user from Google profile
+  async createUserFromGoogle(googleData: GoogleUserData): Promise<WordPressUser> {
+    try {
+      // Generate username from email (before @ symbol)
+      const username = googleData.email.split('@')[0].toLowerCase().replace(/[^a-z0-9]/g, '');
+      
+      const user = await this.makeRequest('users', {
+        method: 'POST',
+        body: JSON.stringify({
+          username: username,
+          email: googleData.email,
+          password: this.generateTempPassword(), // Generate a random password
+          first_name: googleData.firstName,
+          last_name: googleData.lastName,
+          roles: ['subscriber'],
+          meta: {
+            google_id: googleData.googleId,
+            picture: googleData.picture
+          }
+        }),
+      });
+
+      return {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        first_name: user.first_name,
+        last_name: user.last_name,
+        google_id: googleData.googleId,
+        picture: googleData.picture
+      };
+    } catch (error) {
+      console.error('Error creating user from Google:', error);
+      throw error;
     }
   }
 

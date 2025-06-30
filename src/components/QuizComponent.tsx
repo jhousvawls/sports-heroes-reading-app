@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 import { Question } from '@/data/athletes';
-import { CheckCircle, XCircle, ArrowRight, RotateCcw } from 'lucide-react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faCheckCircle, faTimesCircle, faArrowRight, faRedo, faTrophy, faStar } from '@fortawesome/free-solid-svg-icons';
 
 interface QuizComponentProps {
   questions: Question[];
@@ -55,26 +56,54 @@ export default function QuizComponent({ questions, onComplete, onRestart }: Quiz
   if (isComplete) {
     const finalScore = score + (selectedAnswer === questions[currentQuestion].correct ? 1 : 0);
     const percentage = Math.round((finalScore / questions.length) * 100);
+    const isPerfectScore = finalScore === questions.length;
     
     return (
-      <div className="bg-dark-card rounded-xl shadow-lg p-4 sm:p-6 lg:p-8 text-center">
+      <div className={`bg-dark-card rounded-xl shadow-lg p-4 sm:p-6 lg:p-8 text-center ${isPerfectScore ? 'border-2 border-green-500 bg-gradient-to-br from-dark-card to-green-900/30' : ''}`}>
+        {isPerfectScore && (
+          <div className="mb-4 animate-bounce">
+            <FontAwesomeIcon icon={faTrophy} className="text-6xl text-yellow-500 mb-2" />
+            <div className="text-green-400 font-bold text-lg">🎉 STORY COMPLETED! 🎉</div>
+          </div>
+        )}
+        
         <div className="text-5xl sm:text-6xl mb-3 sm:mb-4">
-          {percentage >= 80 ? '🏆' : percentage >= 60 ? '⭐' : '👍'}
+          <FontAwesomeIcon 
+            icon={isPerfectScore ? faTrophy : percentage >= 60 ? faStar : faCheckCircle} 
+            className={isPerfectScore ? 'text-yellow-500' : percentage >= 60 ? 'text-blue-500' : 'text-gray-500'}
+          />
         </div>
-        <h2 className="text-2xl sm:text-3xl font-bold text-white mb-3 sm:mb-4">Quiz Complete!</h2>
+        
+        <h2 className="text-2xl sm:text-3xl font-bold text-white mb-3 sm:mb-4">
+          {isPerfectScore ? 'Perfect Score!' : 'Quiz Complete!'}
+        </h2>
+        
         <div className="text-lg sm:text-xl text-secondary mb-4 sm:mb-6">
-          You got <span className="font-bold text-green-400">{finalScore}</span> out of{' '}
+          You got <span className={`font-bold ${isPerfectScore ? 'text-green-400' : 'text-yellow-400'}`}>{finalScore}</span> out of{' '}
           <span className="font-bold text-white">{questions.length}</span> questions correct!
         </div>
+        
         <div className="text-base sm:text-lg text-secondary mb-6 sm:mb-8">
-          That&apos;s {percentage}%! {percentage >= 80 ? 'Excellent work!' : percentage >= 60 ? 'Good job!' : 'Keep practicing!'}
+          That&apos;s {percentage}%! {isPerfectScore ? 'You have completed this story!' : percentage >= 60 ? 'Good job! Try for a perfect score to complete the story.' : 'Keep practicing to complete the story!'}
         </div>
+        
+        {isPerfectScore && (
+          <div className="bg-green-900/50 border border-green-500 rounded-lg p-4 mb-6">
+            <div className="text-green-400 font-bold mb-2">🌟 Achievement Unlocked!</div>
+            <div className="text-white text-sm">You have successfully completed this athlete's story with a perfect quiz score!</div>
+          </div>
+        )}
+        
         <button
           onClick={handleRestart}
-          className="bg-tennessee-orange hover:bg-tennessee-orange-dark text-white font-bold py-3 px-6 sm:px-8 rounded-full transition-colors duration-200 text-base sm:text-lg flex items-center gap-2 mx-auto w-full sm:w-auto justify-center"
+          className={`font-bold py-3 px-6 sm:px-8 rounded-full transition-colors duration-200 text-base sm:text-lg flex items-center gap-2 mx-auto w-full sm:w-auto justify-center ${
+            isPerfectScore 
+              ? 'bg-green-500 hover:bg-green-600 text-white' 
+              : 'bg-tennessee-orange hover:bg-tennessee-orange-dark text-white'
+          }`}
         >
-          <RotateCcw className="w-4 h-4 sm:w-5 sm:h-5" />
-          Try Again
+          <FontAwesomeIcon icon={faRedo} className="w-4 h-4 sm:w-5 sm:h-5" />
+          {isPerfectScore ? 'Try Another Story' : 'Try Again'}
         </button>
       </div>
     );
@@ -132,10 +161,10 @@ export default function QuizComponent({ questions, onComplete, onRestart }: Quiz
               <div className="flex items-center justify-between">
                 <span className="text-base sm:text-lg pr-2">{option}</span>
                 {showExplanation && option === question.correct && (
-                  <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-green-400 flex-shrink-0" />
+                  <FontAwesomeIcon icon={faCheckCircle} className="w-5 h-5 sm:w-6 sm:h-6 text-green-400 flex-shrink-0" />
                 )}
                 {showExplanation && option === selectedAnswer && option !== question.correct && (
-                  <XCircle className="w-5 h-5 sm:w-6 sm:h-6 text-red-400 flex-shrink-0" />
+                  <FontAwesomeIcon icon={faTimesCircle} className="w-5 h-5 sm:w-6 sm:h-6 text-red-400 flex-shrink-0" />
                 )}
               </div>
             </button>
@@ -147,9 +176,9 @@ export default function QuizComponent({ questions, onComplete, onRestart }: Quiz
         <div className={`p-3 sm:p-4 rounded-lg mb-4 sm:mb-6 ${isCorrect ? 'bg-green-900 border border-green-500' : 'bg-red-900 border border-red-500'}`}>
           <div className="flex items-center gap-2 mb-2">
             {isCorrect ? (
-              <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-green-400 flex-shrink-0" />
+              <FontAwesomeIcon icon={faCheckCircle} className="w-4 h-4 sm:w-5 sm:h-5 text-green-400 flex-shrink-0" />
             ) : (
-              <XCircle className="w-4 h-4 sm:w-5 sm:h-5 text-red-400 flex-shrink-0" />
+              <FontAwesomeIcon icon={faTimesCircle} className="w-4 h-4 sm:w-5 sm:h-5 text-red-400 flex-shrink-0" />
             )}
             <span className={`font-semibold text-sm sm:text-base ${isCorrect ? 'text-green-400' : 'text-red-400'}`}>
               {isCorrect ? 'Correct!' : 'Not quite right'}
@@ -169,12 +198,12 @@ export default function QuizComponent({ questions, onComplete, onRestart }: Quiz
             Submit Answer
           </button>
         ) : (
-          <button
+            <button
             onClick={handleNextQuestion}
             className="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 sm:px-8 rounded-full transition-colors duration-200 text-base sm:text-lg flex items-center gap-2 w-full sm:w-auto justify-center"
           >
             {currentQuestion + 1 < questions.length ? 'Next Question' : 'Finish Quiz'}
-            <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" />
+            <FontAwesomeIcon icon={faArrowRight} className="w-4 h-4 sm:w-5 sm:h-5" />
           </button>
         )}
       </div>
