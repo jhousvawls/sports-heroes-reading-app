@@ -121,7 +121,7 @@ class WordPressAPI {
   async getUserByEmail(email: string): Promise<WordPressUser | null> {
     try {
       const users = await this.makeRequest('users');
-      const user = users.find((u: { email: string; id: number; slug: string; first_name?: string; last_name?: string; meta?: any }) => u.email === email);
+      const user = users.find((u: { email: string; id: number; slug: string; first_name?: string; last_name?: string; meta?: Record<string, unknown> }) => u.email === email);
       
       if (user) {
         return {
