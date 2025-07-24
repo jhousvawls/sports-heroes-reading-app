@@ -14,6 +14,7 @@ interface GoogleProfile {
 }
 
 const handler = NextAuth({
+  debug: true, // Enable debug mode for better error logging
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
