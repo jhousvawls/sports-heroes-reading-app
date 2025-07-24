@@ -90,7 +90,7 @@ export default function QuizComponent({ questions, onComplete, onRestart }: Quiz
         {isPerfectScore && (
           <div className="bg-green-900/50 border border-green-500 rounded-lg p-4 mb-6">
             <div className="text-green-400 font-bold mb-2">🌟 Achievement Unlocked!</div>
-            <div className="text-white text-sm">You have successfully completed this athlete's story with a perfect quiz score!</div>
+            <div className="text-white text-sm">You have successfully completed this athlete&apos;s story with a perfect quiz score!</div>
           </div>
         )}
         
