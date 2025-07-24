@@ -1,331 +1,524 @@
-# Sports Heroes Reading App
+# Sports Heroes Reading App - Complete Documentation
 
 A Next.js reading comprehension app for kids featuring athlete biographies with integrated WordPress user tracking and progress monitoring.
 
-## Features
+## Table of Contents
 
-- 🏆 **User Authentication**: WordPress-integrated login/registration system
-- 📚 **Interactive Stories**: Age-appropriate athlete biographies (3rd grade level)
-- 🧠 **Comprehension Quizzes**: Multiple-choice questions with explanations
-- 📊 **Progress Tracking**: Detailed reading and quiz progress stored in WordPress
+- [Overview](#overview)
+- [How the App Works - User Perspective](#how-the-app-works---user-perspective)
+- [How the App Works - Technical Perspective](#how-the-app-works---technical-perspective)
+- [Architecture Deep Dive](#architecture-deep-dive)
+- [Content Library](#content-library)
+- [Setup & Installation](#setup--installation)
+- [Development](#development)
+- [Deployment](#deployment)
+- [Testing](#testing)
+- [Performance & Optimization](#performance--optimization)
+
+## Overview
+
+The Sports Heroes Reading App is an educational platform designed to improve reading comprehension for elementary school students (3rd grade level) through engaging athlete biographies. The app combines storytelling, interactive quizzes, and progress tracking to create an immersive learning experience.
+
+### Key Features
+
+- 🏆 **User Authentication**: WordPress-integrated login/registration with Google OAuth
+- 📚 **Interactive Stories**: 26 age-appropriate athlete biographies with rich content
+- 🧠 **Comprehension Quizzes**: Multiple-choice questions with detailed explanations
+- 📊 **Progress Tracking**: Comprehensive reading and quiz progress stored in WordPress
 - 🔊 **Text-to-Speech**: Read-aloud functionality for accessibility
-- 📱 **Responsive Design**: Works on desktop, tablet, and mobile
-- ⚡ **Fast Performance**: Built with Next.js and optimized for WP Engine
+- 📱 **Responsive Design**: Optimized for desktop, tablet, and mobile devices
+- 🖨️ **Print/Export**: Story printing and PDF generation capabilities
+- ⚡ **Performance**: Built with Next.js 15 and optimized for WP Engine hosting
 
-## Technology Stack
+### Technology Stack
 
-- **Frontend**: Next.js 15, React, TypeScript, Tailwind CSS
-- **Backend**: WordPress REST API, Custom Post Types
-- **Icons**: Lucide React
+- **Frontend**: Next.js 15, React 19, TypeScript, Tailwind CSS
+- **Backend**: WordPress REST API with custom plugin
+- **Authentication**: NextAuth.js with Google OAuth
+- **Icons**: FontAwesome and Lucide React
+- **Testing**: Jest, React Testing Library, Cypress
 - **Hosting**: Optimized for WP Engine headless Node.js environments
 
-## Quick Start
+---
 
-### 1. WordPress Setup
+## How the App Works - User Perspective
 
-1. Install the WordPress plugin:
-   ```bash
-   # Copy the plugin to your WordPress installation
-   cp wordpress-plugin/sports-heroes-progress.php /path/to/wordpress/wp-content/plugins/
-   ```
+### 1. Authentication & Onboarding
 
-2. Activate the plugin in WordPress Admin:
-   - Go to Plugins → Installed Plugins
-   - Find "Sports Heroes Progress Tracker"
-   - Click "Activate"
+**User Journey:**
+1. **Landing Page**: Users see the Sports Heroes branding and Google Sign-In option
+2. **Google Authentication**: One-click sign-in with Google account
+3. **Account Creation**: App automatically creates WordPress user profile
+4. **Welcome Screen**: Users land on the athlete selection homepage
 
-3. Create an Application Password for API access:
-   - Go to Users → Your Profile
-   - Scroll to "Application Passwords"
-   - Create a new password for "Sports Heroes App"
+**User Experience Features:**
+- Seamless Google OAuth integration
+- No complex registration forms
+- Automatic profile creation and management
+- Persistent login sessions
 
-### 2. Environment Configuration
+### 2. Athlete Selection & Discovery
 
-1. Update `.env.local` with your WordPress details:
-   ```env
-   NEXT_PUBLIC_WORDPRESS_URL=https://your-wordpress-site.com
-   WORDPRESS_USERNAME=your_wp_username
-   WORDPRESS_PASSWORD=your_wp_app_password
-   ```
+**Main Interface:**
+- **Featured Athletes Grid**: 6 primary athletes with rich story content
+- **Suggestion System**: 20 additional athletes across 4 sports categories
+- **Progress Indicators**: Visual badges showing completion status
+- **Sport Categories**: Soccer ⚽, Basketball 🏀, Baseball ⚾, Football 🏈
 
-### 3. Install Dependencies
+**Selection Process:**
+1. Users browse athlete cards with photos, names, and sports
+2. Progress indicators show story read/quiz completion status
+3. Click on any athlete card to begin reading experience
+4. "Suggest a Sports Hero" button opens modal with additional options
 
-```bash
-npm install
+### 3. Reading Experience
+
+**Story Interface:**
+- **Clean Reading Layout**: Optimized typography for young readers
+- **Audio Narration**: Text-to-speech with natural voice synthesis
+- **Reading Timer**: Automatic tracking of time spent reading
+- **Print Options**: Full story printing and print preview
+- **Navigation**: Easy back-to-home and progress tracking
+
+**Reading Features:**
+- Stories written at 3rd grade reading level
+- Inspiring content focusing on perseverance and character
+- 500-800 word stories with clear paragraph structure
+- Emoji-based athlete representations for visual appeal
+
+### 4. Interactive Quiz System
+
+**Quiz Experience:**
+1. **Question Presentation**: One question at a time with progress indicator
+2. **Multiple Choice**: 4 answer options per question
+3. **Immediate Feedback**: Instant correct/incorrect indication
+4. **Explanations**: Detailed explanations for every answer
+5. **Scoring**: Real-time score tracking throughout quiz
+6. **Completion**: Celebration screen with final score and achievements
+
+**Quiz Mechanics:**
+- 3 questions per featured athlete
+- Questions test reading comprehension and key story details
+- Explanations reinforce learning and provide additional context
+- Perfect scores unlock "Story Completed" achievement
+- Retry functionality encourages improvement
+
+### 5. Progress Tracking & Achievements
+
+**Progress Dashboard:**
+- **Individual Athlete Progress**: Story read status, quiz scores, reading time
+- **Overall Statistics**: Total stories read, average quiz scores
+- **Achievement System**: Visual indicators for completed stories
+- **Time Tracking**: Reading duration for each story
+
+**Progress Features:**
+- Persistent progress across devices and sessions
+- Visual progress indicators (green = completed, orange = in progress)
+- Detailed quiz score breakdowns (e.g., "3/3 correct")
+- Reading time tracking in minutes
+- Achievement badges for perfect quiz scores
+
+---
+
+## How the App Works - Technical Perspective
+
+### 1. Frontend Architecture (Next.js 15)
+
+**App Router Structure:**
+```
+src/app/
+├── layout.tsx          # Root layout with providers
+├── page.tsx           # Main application component
+├── globals.css        # Global styles and Tailwind
+└── api/
+    └── auth/
+        └── [...nextauth]/ # NextAuth.js configuration
 ```
 
-### 4. Run Development Server
-
-```bash
-npm run dev
+**Component Architecture:**
+```
+src/components/
+├── AthleteCard.tsx           # Individual athlete display
+├── QuizComponent.tsx         # Interactive quiz system
+├── GoogleSignIn.tsx          # Authentication component
+├── LoginForm.tsx             # Alternative login form
+├── ProgressBadge.tsx         # Progress indicators
+├── PrintPreview.tsx          # Print functionality
+├── SuggestionModal.tsx       # Additional athletes modal
+├── ErrorBoundary.tsx         # Error handling
+└── SessionProvider.tsx       # Authentication context
 ```
 
-Visit [http://localhost:3000](http://localhost:3000) to see the app.
+**State Management:**
+- **React Hooks**: useState, useEffect for local state
+- **Custom Hooks**: useProgress for WordPress API integration
+- **NextAuth Session**: Global authentication state
+- **Local Storage**: Temporary data persistence
 
-## User Flow
+### 2. WordPress Backend Integration
 
-1. **Registration/Login**: Users create accounts or sign in
-2. **Athlete Selection**: Choose from available sports heroes
-3. **Story Reading**: Read athlete biographies with optional audio narration
-4. **Quiz Taking**: Answer comprehension questions with immediate feedback
-5. **Progress Tracking**: View reading history and quiz scores
+**Custom WordPress Plugin** (`wordpress-plugin/sports-heroes-progress.php`):
 
-## WordPress Integration
+**Custom Post Type**: `sports-progress`
+```php
+// Registers custom post type for progress tracking
+register_post_type('sports-progress', [
+    'public' => false,
+    'show_ui' => true,
+    'show_in_rest' => true,
+    'supports' => ['title', 'editor', 'custom-fields']
+]);
+```
 
-### Custom Post Type: `sports-progress`
+**REST API Endpoints:**
+- `GET /wp-json/sports-heroes/v1/progress/{user_id}` - Retrieve user progress
+- `POST /wp-json/sports-heroes/v1/progress` - Save new progress entry
+- `PUT /wp-json/sports-heroes/v1/progress/{user_id}/{athlete_id}` - Update existing progress
 
-The app creates progress entries with these fields:
-- `user_id`: WordPress user ID
-- `athlete_id`: Athlete identifier
-- `athlete_name`: Name of the athlete
-- `story_read`: Boolean - whether story was read
-- `quiz_completed`: Boolean - whether quiz was completed
-- `quiz_score`: Number of correct answers
-- `total_questions`: Total quiz questions
-- `completion_date`: When activity was completed
-- `time_spent_reading`: Reading time in seconds
+**Progress Data Structure:**
+```typescript
+interface ProgressRecord {
+  user_id: number;
+  athlete_id: number;
+  athlete_name: string;
+  story_read: boolean;
+  quiz_completed: boolean;
+  quiz_score: number;
+  total_questions: number;
+  completion_date: string;
+  time_spent_reading?: number;
+}
+```
 
-### API Endpoints
+### 3. Authentication System
 
-- `GET /wp-json/sports-heroes/v1/progress/{user_id}` - Get user progress
-- `POST /wp-json/sports-heroes/v1/progress` - Save new progress
-- `PUT /wp-json/sports-heroes/v1/progress/{user_id}/{athlete_id}` - Update progress
+**NextAuth.js Configuration:**
+```typescript
+// Google OAuth provider with WordPress user sync
+providers: [
+  GoogleProvider({
+    clientId: process.env.GOOGLE_CLIENT_ID,
+    clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+  })
+]
 
-## Current Athletes
+// Custom callbacks for WordPress integration
+callbacks: {
+  async signIn({ user, account, profile }) {
+    // Create or retrieve WordPress user
+    const wpUser = await wordpressAPI.getUserByEmail(user.email);
+    if (!wpUser) {
+      await wordpressAPI.createUserFromGoogle(userData);
+    }
+    return true;
+  }
+}
+```
 
-### Featured Athletes (6 total)
-1. **Patrick Mahomes** (Football) - 3 questions
-2. **Serena Williams** (Tennis) - 3 questions  
-3. **LeBron James** (Basketball) - 3 questions
-4. **Simone Biles** (Gymnastics) - 3 questions
-5. **Lionel Messi** (Soccer) - 3 questions
-6. **Muhammad Ali** (Boxing) - 3 questions
+**WordPress User Management:**
+```typescript
+class WordPressAPI {
+  async createUserFromGoogle(googleData: GoogleUserData): Promise<WordPressUser> {
+    // Creates WordPress user with Google profile data
+    // Stores Google ID and profile picture in user meta
+    // Assigns subscriber role for app access
+  }
+  
+  async getUserByEmail(email: string): Promise<WordPressUser | null> {
+    // Retrieves existing WordPress user by email
+    // Returns user data including WordPress ID for progress tracking
+  }
+}
+```
 
-### Suggested Athletes (20 total - 5 per sport)
+### 4. Data Flow Architecture
 
-#### Soccer (5 athletes)
-- Pelé, Cristiano Ronaldo, Mia Hamm, Diego Maradona, Ronaldinho
+**Reading Progress Flow:**
+1. **Story Reading**: Timer starts when user enters story view
+2. **Time Tracking**: JavaScript tracks reading duration
+3. **Progress Save**: When user clicks "Take Quiz", story progress saved to WordPress
+4. **API Call**: `useProgress` hook calls WordPress REST API
+5. **Database Storage**: Progress stored as custom post with metadata
 
-#### Basketball (5 athletes)  
-- Michael Jordan, LeBron James, Kobe Bryant, Magic Johnson, Stephen Curry
+**Quiz Completion Flow:**
+1. **Quiz Interaction**: User answers questions in QuizComponent
+2. **Score Calculation**: Real-time scoring with immediate feedback
+3. **Completion Trigger**: Final score calculated on quiz completion
+4. **Progress Update**: Quiz results saved to WordPress via API
+5. **UI Update**: Progress indicators updated across the app
 
-#### Baseball (5 athletes)
-- Babe Ruth, Jackie Robinson, Derek Jeter, Lou Gehrig, Hank Aaron
+**Data Persistence:**
+```typescript
+// useProgress hook manages all WordPress API interactions
+const { saveStoryRead, saveQuizScore, getAthleteProgress } = useProgress(wpUserId);
 
-#### Football (5 athletes)
-- Tom Brady, Joe Montana, Jerry Rice, Jim Brown, Peyton Manning
+// Story completion
+await saveStoryRead(athleteId, athleteName, timeSpent);
 
-**Total: 26 athletes with inspiring stories and educational quizzes**
+// Quiz completion
+await saveQuizScore(athleteId, athleteName, score, totalQuestions);
+```
 
-## Adding New Athletes
+### 5. Content Management System
 
-1. Edit `src/data/athletes.ts`
-2. Add new athlete object with:
-   - Unique ID
-   - Name, sport, emoji
-   - Age-appropriate story (3rd grade level)
-   - 3+ comprehension questions with explanations
+**Athlete Data Structure:**
+```typescript
+interface Athlete {
+  id: number;
+  name: string;
+  sport: string;
+  image: string;        // Emoji representation
+  story: string;        // 3rd grade level biography
+  questions: Question[]; // Comprehension quiz questions
+}
 
-## Deployment to WP Engine
+interface Question {
+  id: number;
+  question: string;
+  options: string[];    // 4 multiple choice options
+  correct: string;      // Correct answer
+  explanation: string;  // Educational explanation
+}
+```
+
+**Content Categories:**
+- **Featured Athletes** (IDs 1-6): Full stories with 3 questions each
+- **Suggested Athletes** (IDs 101-120): Extended library across 4 sports
+- **Sport Categories**: Soccer (5), Basketball (5), Baseball (5), Football (5)
+
+### 6. Performance & Optimization
+
+**Next.js Optimizations:**
+- **App Router**: Latest Next.js routing for optimal performance
+- **Server Components**: Reduced client-side JavaScript
+- **Image Optimization**: Automatic image optimization and lazy loading
+- **Bundle Splitting**: Automatic code splitting for faster loads
+
+**WordPress API Optimization:**
+- **Caching**: WordPress object caching for API responses
+- **Pagination**: Efficient data retrieval for large datasets
+- **Authentication**: Basic auth with application passwords
+
+**Frontend Performance:**
+- **Lazy Loading**: Components loaded on demand
+- **Memoization**: React.memo for expensive components
+- **Debouncing**: API calls optimized to prevent excessive requests
+
+---
+
+## Architecture Deep Dive
+
+### Component Interaction Flow
+
+```
+App (page.tsx)
+├── SessionProvider (Authentication Context)
+├── GoogleSignIn (if not authenticated)
+└── Main App Views:
+    ├── Home View
+    │   ├── AthleteCard[] (Featured Athletes)
+    │   └── SuggestionModal (Additional Athletes)
+    ├── Story View
+    │   ├── Story Content
+    │   ├── Text-to-Speech Controls
+    │   └── PrintPreview Modal
+    ├── Quiz View
+    │   └── QuizComponent (Interactive Questions)
+    └── Progress View
+        └── ProgressBadge[] (Achievement Tracking)
+```
+
+### Data Flow Diagram
+
+```
+User Action → React Component → Custom Hook → WordPress API → Database
+     ↓              ↓              ↓              ↓            ↓
+Story Read → page.tsx → useProgress → REST API → Custom Post
+Quiz Complete → QuizComponent → saveQuizScore → sports-heroes/v1 → Meta Fields
+Progress View → ProgressBadge → getAthleteProgress → WP Query → Display
+```
+
+### WordPress Plugin Architecture
+
+**Plugin Structure:**
+```php
+class SportsHeroesProgress {
+    public function __construct() {
+        add_action('init', [$this, 'create_post_type']);
+        add_action('rest_api_init', [$this, 'register_api_routes']);
+        add_action('add_meta_boxes', [$this, 'add_meta_boxes']);
+    }
+    
+    // Custom post type registration
+    public function create_post_type() { /* ... */ }
+    
+    // REST API endpoint registration
+    public function register_api_routes() { /* ... */ }
+    
+    // Admin interface for progress management
+    public function add_meta_boxes() { /* ... */ }
+}
+```
+
+**Database Schema:**
+```sql
+-- WordPress Posts Table (wp_posts)
+ID, post_title, post_content, post_type='sports-progress'
+
+-- WordPress Meta Table (wp_postmeta)
+post_id, meta_key='user_id', meta_value='123'
+post_id, meta_key='athlete_id', meta_value='1'
+post_id, meta_key='story_read', meta_value='1'
+post_id, meta_key='quiz_completed', meta_value='1'
+post_id, meta_key='quiz_score', meta_value='3'
+post_id, meta_key='total_questions', meta_value='3'
+```
+
+---
+
+## Content Library
+
+### Featured Athletes (6 Total)
+
+| Athlete | Sport | Questions | Key Themes |
+|---------|-------|-----------|------------|
+| **Patrick Mahomes** | Football | 3 | Leadership, perseverance, community service |
+| **Serena Williams** | Tennis | 3 | Determination, breaking barriers, motherhood |
+| **LeBron James** | Basketball | 3 | Education, giving back, overcoming adversity |
+| **Simone Biles** | Gymnastics | 3 | Mental health, courage, excellence |
+| **Lionel Messi** | Soccer | 3 | Overcoming physical challenges, hard work |
+| **Muhammad Ali** | Boxing | 3 | Standing up for beliefs, courage, conviction |
+
+### Suggested Athletes (20 Total)
+
+**Soccer (5 Athletes):**
+- Pelé - Brazilian legend, joy in the game
+- Cristiano Ronaldo - Work ethic and dedication
+- Mia Hamm - Women's soccer pioneer
+- Diego Maradona - Overcoming poverty
+- Ronaldinho - Creativity and passion
+
+**Basketball (5 Athletes):**
+- Michael Jordan - Learning from failure
+- LeBron James - Community leadership
+- Kobe Bryant - Mamba mentality
+- Magic Johnson - Teamwork and leadership
+- Stephen Curry - Overcoming size limitations
+
+**Baseball (5 Athletes):**
+- Babe Ruth - Changing the game
+- Jackie Robinson - Breaking barriers
+- Derek Jeter - Leadership and clutch performance
+- Lou Gehrig - Courage in adversity
+- Hank Aaron - Perseverance through racism
+
+**Football (5 Athletes):**
+- Tom Brady - Overcoming low expectations
+- Joe Montana - Staying calm under pressure
+- Jerry Rice - Hard work and preparation
+- Jim Brown - Athletic excellence and activism
+- Peyton Manning - Intelligence and preparation
+
+### Story Writing Guidelines
+
+**Reading Level**: 3rd Grade (Flesch-Kincaid 3.0-4.0)
+**Length**: 500-800 words per story
+**Structure**: 6-8 paragraphs with clear topic sentences
+**Themes**: Perseverance, character, overcoming challenges, giving back
+**Language**: Simple sentences, age-appropriate vocabulary, inspiring tone
+
+**Quiz Question Standards:**
+- 3 questions per featured athlete
+- Multiple choice with 4 options
+- Focus on reading comprehension and key story details
+- Educational explanations for all answers
+- Mix of factual recall and inference questions
+
+---
+
+## Setup & Installation
 
 ### Prerequisites
 
-- WP Engine account with Node.js hosting enabled
-- WordPress site (can be on same WP Engine account or separate)
-- Git repository access
-- Domain configured for your Node.js environment
+- **Node.js**: Version 18.x or 20.x (LTS)
+- **WordPress Site**: With admin access for plugin installation
+- **Google OAuth**: Client ID and Secret for authentication
+- **WP Engine Account**: (Optional) For production hosting
 
-### Build for Production
+### Local Development Setup
 
-```bash
-# Install dependencies
-npm install
-
-# Build the application
-npm run build
-
-# Test the build locally (optional)
-npm start
-```
-
-### Environment Variables for Production
-
-Create these environment variables in your WP Engine User Portal:
-
-```env
-NODE_ENV=production
-NEXT_PUBLIC_WORDPRESS_URL=https://your-wordpress-site.wpengine.com
-WORDPRESS_USERNAME=your_wp_username
-WORDPRESS_PASSWORD=your_wp_app_password
-```
-
-### WP Engine Node.js Deployment
-
-#### Method 1: Git Deployment (Recommended)
-
-1. **Connect Git Repository**:
-   - Log into WP Engine User Portal
-   - Navigate to your Node.js environment
-   - Go to "Git Push" settings
-   - Connect your GitHub repository
-
-2. **Configure Build Settings**:
+1. **Clone Repository**
    ```bash
-   # Build command
-   npm run build
+   git clone https://github.com/jhousvawls/sports-heroes-reading-app.git
+   cd sports-heroes-app
+   ```
+
+2. **Install Dependencies**
+   ```bash
+   npm install
+   ```
+
+3. **Environment Configuration**
+   ```bash
+   cp .env.example .env.local
+   ```
    
-   # Start command  
-   npm start
+   Configure environment variables:
+   ```env
+   # WordPress Configuration
+   NEXT_PUBLIC_WORDPRESS_URL=https://your-wordpress-site.com
+   WORDPRESS_USERNAME=your_wp_username
+   WORDPRESS_PASSWORD=your_wp_app_password
    
-   # Node.js version
-   18.x or 20.x (latest LTS)
-   ```
-
-3. **Deploy**:
-   ```bash
-   git push wpengine main
-   ```
-
-#### Method 2: Manual Upload
-
-1. **Build Locally**:
-   ```bash
-   npm run build
-   ```
-
-2. **Upload Files**:
-   - Compress your project folder
-   - Upload via WP Engine User Portal
-   - Extract in your Node.js environment root
-
-### WordPress Plugin Setup
-
-1. **Install Plugin on WordPress Site**:
-   ```bash
-   # If WordPress is on WP Engine
-   # Upload via WordPress Admin or SFTP
+   # Google OAuth
+   GOOGLE_CLIENT_ID=your_google_client_id
+   GOOGLE_CLIENT_SECRET=your_google_client_secret
    
-   # Copy plugin file to:
-   /wp-content/plugins/sports-heroes-progress.php
+   # NextAuth
+   NEXTAUTH_URL=http://localhost:3000
+   NEXTAUTH_SECRET=your_nextauth_secret
    ```
 
-2. **Activate Plugin**:
-   - WordPress Admin → Plugins
+4. **WordPress Plugin Installation**
+   ```bash
+   # Copy plugin to WordPress installation
+   cp wordpress-plugin/sports-heroes-progress.php /path/to/wordpress/wp-content/plugins/
+   ```
+   
+   Activate plugin in WordPress Admin:
+   - Navigate to Plugins → Installed Plugins
    - Find "Sports Heroes Progress Tracker"
    - Click "Activate"
 
-3. **Create Application Password**:
-   - Users → Your Profile
-   - Application Passwords section
-   - Add "Sports Heroes App"
-   - Copy generated password
+5. **WordPress Application Password**
+   - Go to Users → Your Profile in WordPress Admin
+   - Scroll to "Application Passwords" section
+   - Create new password for "Sports Heroes App"
+   - Use this password in WORDPRESS_PASSWORD environment variable
 
-### Domain Configuration
+6. **Google OAuth Setup**
+   - Visit [Google Cloud Console](https://console.cloud.google.com/)
+   - Create new project or select existing
+   - Enable Google+ API
+   - Create OAuth 2.0 credentials
+   - Add authorized redirect URI: `http://localhost:3000/api/auth/callback/google`
 
-1. **Primary Domain**:
-   - Configure your custom domain in WP Engine
-   - Update DNS records to point to WP Engine
-   - Enable SSL certificate
-
-2. **CORS Configuration** (if needed):
-   ```javascript
-   // next.config.ts
-   const nextConfig = {
-     async headers() {
-       return [
-         {
-           source: '/api/:path*',
-           headers: [
-             { key: 'Access-Control-Allow-Origin', value: 'https://your-wordpress-site.com' },
-             { key: 'Access-Control-Allow-Methods', value: 'GET,POST,PUT,DELETE' },
-             { key: 'Access-Control-Allow-Headers', value: 'Content-Type,Authorization' },
-           ],
-         },
-       ];
-     },
-   };
-   ```
-
-### Performance Optimization for WP Engine
-
-1. **CDN Configuration**:
-   - Enable WP Engine's Global Edge Security
-   - Configure static asset caching
-   - Optimize image delivery
-
-2. **Caching Headers**:
-   ```javascript
-   // next.config.ts
-   const nextConfig = {
-     async headers() {
-       return [
-         {
-           source: '/_next/static/:path*',
-           headers: [
-             { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
-           ],
-         },
-       ];
-     },
-   };
-   ```
-
-### Monitoring and Debugging
-
-1. **Application Logs**:
-   - Access via WP Engine User Portal
-   - Monitor Node.js application logs
-   - Check for API connection errors
-
-2. **Health Checks**:
+7. **Start Development Server**
    ```bash
-   # Test WordPress API connectivity
-   curl -X GET "https://your-wordpress-site.com/wp-json/wp/v2/users/me" \
-        -H "Authorization: Basic $(echo -n 'username:app_password' | base64)"
+   npm run dev
    ```
+   
+   Visit [http://localhost:3000](http://localhost:3000)
 
-3. **Performance Monitoring**:
-   - Use WP Engine's performance insights
-   - Monitor response times and error rates
-   - Set up uptime monitoring
+### Verification Steps
 
-### Deployment Checklist
+1. **Authentication Test**: Sign in with Google account
+2. **WordPress Connection**: Check that user is created in WordPress
+3. **Story Reading**: Select athlete and read story
+4. **Quiz Functionality**: Complete quiz and verify score saving
+5. **Progress Tracking**: Check progress dashboard for saved data
 
-- [ ] WordPress plugin installed and activated
-- [ ] Application password created
-- [ ] Environment variables configured
-- [ ] Domain DNS configured
-- [ ] SSL certificate enabled
-- [ ] API connectivity tested
-- [ ] User registration/login tested
-- [ ] Story reading functionality verified
-- [ ] Quiz completion and progress tracking working
-- [ ] Performance optimizations applied
-- [ ] Monitoring and alerts configured
-
-### Troubleshooting
-
-**Common Issues**:
-
-1. **API Connection Errors**:
-   - Verify WordPress URL and credentials
-   - Check application password permissions
-   - Ensure WordPress site is accessible
-
-2. **Build Failures**:
-   - Check Node.js version compatibility
-   - Verify all dependencies are installed
-   - Review build logs for specific errors
-
-3. **Performance Issues**:
-   - Enable caching headers
-   - Optimize images and assets
-   - Use WP Engine's CDN features
-
-**Support Resources**:
-- WP Engine Node.js documentation
-- WP Engine support team
-- WordPress REST API documentation
+---
 
 ## Development
 
@@ -334,61 +527,514 @@ WORDPRESS_PASSWORD=your_wp_app_password
 ```
 sports-heroes-app/
 ├── src/
-│   ├── app/                 # Next.js app router
-│   ├── components/          # React components
-│   │   ├── AthleteCard.tsx
-│   │   ├── QuizComponent.tsx
-│   │   └── LoginForm.tsx
-│   ├── data/               # Static data
-│   │   └── athletes.ts
-│   ├── hooks/              # Custom React hooks
-│   │   ├── useAuth.ts
-│   │   └── useProgress.ts
-│   └── lib/                # Utilities
-│       └── wordpress.ts
-├── wordpress-plugin/       # WordPress plugin
-└── public/                # Static assets
+│   ├── app/                    # Next.js App Router
+│   │   ├── layout.tsx         # Root layout with providers
+│   │   ├── page.tsx           # Main application component
+│   │   ├── globals.css        # Global styles
+│   │   └── api/auth/          # NextAuth configuration
+│   ├── components/            # React components
+│   │   ├── AthleteCard.tsx    # Athlete display cards
+│   │   ├── QuizComponent.tsx  # Interactive quiz system
+│   │   ├── GoogleSignIn.tsx   # Authentication component
+│   │   ├── ProgressBadge.tsx  # Progress indicators
+│   │   └── ...               # Additional components
+│   ├── data/                  # Static data files
+│   │   ├── athletes.ts        # Featured athlete data
+│   │   └── suggestedAthletes.ts # Extended athlete library
+│   ├── hooks/                 # Custom React hooks
+│   │   └── useProgress.ts     # WordPress API integration
+│   ├── lib/                   # Utility libraries
+│   │   ├── wordpress.ts       # WordPress API client
+│   │   └── fontawesome.ts     # Icon configuration
+│   └── types/                 # TypeScript type definitions
+├── wordpress-plugin/          # WordPress plugin
+│   └── sports-heroes-progress.php
+├── cypress/                   # E2E tests
+├── public/                    # Static assets
+└── docs/                      # Additional documentation
 ```
 
-### Key Components
+### Key Development Files
 
-- **LoginForm**: User authentication interface
-- **AthleteCard**: Displays athlete information and progress indicators
-- **QuizComponent**: Interactive quiz with scoring and explanations
-- **useProgress**: Hook for managing reading/quiz progress
-- **wordpress.ts**: API integration layer
+**Main Application** (`src/app/page.tsx`):
+- Central component managing all app views
+- Handles view state (home, story, quiz, progress)
+- Manages athlete selection and navigation
+- Integrates authentication and progress tracking
 
-## Features for Parents/Teachers
+**WordPress API Client** (`src/lib/wordpress.ts`):
+- Handles all WordPress REST API interactions
+- User management and authentication
+- Progress data persistence
+- Error handling and retry logic
 
-### Progress Dashboard
+**Progress Hook** (`src/hooks/useProgress.ts`):
+- Custom React hook for progress management
+- Abstracts WordPress API complexity
+- Provides clean interface for components
+- Handles loading states and error management
 
-- View all athletes and completion status
-- See quiz scores and reading times
-- Track learning progress over time
+**Quiz Component** (`src/components/QuizComponent.tsx`):
+- Interactive quiz with immediate feedback
+- Progress tracking and scoring
+- Achievement system with celebrations
+- Retry functionality and explanations
 
-### WordPress Admin
+### Development Workflow
 
-- View all user progress in WordPress admin
-- Export progress data
-- Monitor app usage and engagement
+1. **Feature Development**
+   ```bash
+   # Create feature branch
+   git checkout -b feature/new-feature
+   
+   # Make changes and test
+   npm run dev
+   npm test
+   
+   # Run E2E tests
+   npm run test:e2e
+   ```
 
-## Future Enhancements
+2. **Code Quality**
+   ```bash
+   # Linting
+   npm run lint
+   
+   # Type checking
+   npx tsc --noEmit
+   
+   # Test coverage
+   npm run test:coverage
+   ```
 
-- [ ] Claude API integration for dynamic content generation
-- [ ] Difficulty level adaptation
-- [ ] More athlete stories
-- [ ] Parent/teacher dashboard
-- [ ] Reading streaks and achievements
-- [ ] Audio story narration improvements
-- [ ] Offline reading capability
+3. **Performance Testing**
+   ```bash
+   # Bundle analysis
+   npm run analyze
+   
+   # Build optimization
+   npm run build
+   npm start
+   ```
 
-## Support
+### Adding New Athletes
 
-For technical support or questions about setup, please refer to:
-- WordPress plugin documentation
-- WP Engine headless hosting guides
-- Next.js deployment documentation
+1. **Update Data File** (`src/data/athletes.ts` or `src/data/suggestedAthletes.ts`):
+   ```typescript
+   {
+     id: 7, // Next available ID
+     name: "New Athlete",
+     sport: "Sport Name",
+     image: "🏆", // Relevant emoji
+     story: `Age-appropriate biography...`,
+     questions: [
+       {
+         id: 1,
+         question: "Comprehension question?",
+         options: ["Option A", "Option B", "Option C", "Option D"],
+         correct: "Option A",
+         explanation: "Educational explanation..."
+       }
+       // Add 2 more questions for featured athletes
+     ]
+   }
+   ```
 
-## License
+2. **Content Guidelines**:
+   - **Reading Level**: 3rd grade (Flesch-Kincaid 3.0-4.0)
+   - **Story Length**: 500-800 words
+   - **Themes**: Perseverance, character, overcoming challenges
+   - **Questions**: Focus on comprehension and key details
 
-This project is designed for educational use in the Sports Heroes Reading App.
+3. **Testing New Content**:
+   ```bash
+   # Test story display
+   npm run dev
+   
+   # Test quiz functionality
+   npm test QuizComponent.test.tsx
+   
+   # Verify progress tracking
+   npm run test:e2e
+   ```
+
+---
+
+## Deployment
+
+### WP Engine Deployment
+
+**Prerequisites:**
+- WP Engine account with Node.js hosting enabled
+- WordPress site (can be on same account or separate)
+- Git repository access
+- Domain configured for Node.js environment
+
+**Environment Setup:**
+1. **WP Engine User Portal Configuration**:
+   ```env
+   NODE_ENV=production
+   NEXT_PUBLIC_WORDPRESS_URL=https://your-site.wpengine.com
+   WORDPRESS_USERNAME=your_wp_username
+   WORDPRESS_PASSWORD=your_wp_app_password
+   GOOGLE_CLIENT_ID=your_google_client_id
+   GOOGLE_CLIENT_SECRET=your_google_client_secret
+   NEXTAUTH_URL=https://your-domain.com
+   NEXTAUTH_SECRET=your_production_secret
+   ```
+
+2. **Git Deployment Setup**:
+   ```bash
+   # Connect repository in WP Engine portal
+   # Configure build settings:
+   # Build Command: npm run build
+   # Start Command: npm start
+   # Node Version: 18.x or 20.x
+   ```
+
+3. **Deploy Application**:
+   ```bash
+   git push wpengine main
+   ```
+
+**WordPress Plugin Deployment:**
+1. **Upload Plugin**:
+   - Via WordPress Admin: Plugins → Add New → Upload Plugin
+   - Via SFTP: Copy to `/wp-content/plugins/`
+
+2. **Activate Plugin**:
+   - WordPress Admin → Plugins → Sports Heroes Progress Tracker → Activate
+
+3. **Create Application Password**:
+   - Users → Your Profile → Application Passwords
+   - Add "Sports Heroes App" → Copy generated password
+
+**Domain & SSL Configuration:**
+1. **Custom Domain**: Configure in WP Engine portal
+2. **DNS Records**: Point to WP Engine servers
+3. **SSL Certificate**: Enable in WP Engine (automatic)
+
+### Performance Optimization
+
+**Next.js Configuration** (`next.config.ts`):
+```typescript
+const nextConfig = {
+  // Enable compression
+  compress: true,
+  
+  // Optimize images
+  images: {
+    formats: ['image/webp', 'image/avif'],
+  },
+  
+  // Cache headers
+  async headers() {
+    return [
+      {
+        source: '/_next/static/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+    ];
+  },
+};
+```
+
+**WordPress Optimization:**
+- **Object Caching**: Enable Redis/Memcached
+- **CDN**: Use WP Engine's Global Edge Security
+- **Database**: Optimize queries and indexes
+
+**Monitoring & Alerts:**
+- **Application Logs**: Monitor via WP Engine portal
+- **Performance**: Use Lighthouse CI
+- **Uptime**: Configure monitoring alerts
+- **Error Tracking**: Implement error reporting
+
+---
+
+## Testing
+
+### Testing Strategy
+
+**Multi-Layer Testing Approach:**
+- **Unit Tests**: Component logic and utilities (Jest + React Testing Library)
+- **Integration Tests**: API interactions and data flow
+- **End-to-End Tests**: Complete user workflows (Cypress)
+- **Performance Tests**: Bundle size and load times (Lighthouse)
+
+### Running Tests
+
+```bash
+# All tests
+npm run test:all
+
+# Unit tests only
+npm test
+
+# Unit tests with coverage
+npm run test:coverage
+
+# E2E tests
+npm run test:e2e
+
+# Watch mode for development
+npm run test:watch
+```
+
+### Test Coverage
+
+**Current Coverage Targets:**
+- **Statements**: 80%+
+- **Branches**: 75%+
+- **Functions**: 80%+
+- **Lines**: 80%+
+
+**Key Test Files:**
+- `src/__tests__/AthleteCard.test.tsx` - Component rendering and interactions
+- `src/__tests__/QuizComponent.test.tsx` - Quiz logic and scoring
+- `cypress/e2e/user-flow.cy.ts` - Complete user journeys
+
+### Writing Tests
+
+**Unit Test Example:**
+```typescript
+import { render, screen, fireEvent } from '@testing-library/react';
+import QuizComponent from '@/components/QuizComponent';
+
+describe('QuizComponent', () => {
+  const mockQuestions = [/* test data */];
+  const mockOnComplete = jest.fn();
+
+  it('displays question and options correctly', () => {
+    render(<QuizComponent questions={mockQuestions} onComplete={mockOnComplete} />);
+    
+    expect(screen.getByText(mockQuestions[0].question)).toBeInTheDocument();
+    mockQuestions[0].options.forEach(option => {
+      expect(screen.getByText(option)).toBeInTheDocument();
+    });
+  });
+
+  it('handles answer selection and submission', () => {
+    render(<QuizComponent questions={mockQuestions} onComplete={mockOnComplete} />);
+    
+    fireEvent.click(screen.getByText('Correct Answer'));
+    fireEvent.click(screen.getByText('Submit Answer'));
+    
+    expect(screen.getByText('Correct!')).toBeInTheDocument();
+  });
+});
+```
+
+**E2E Test Example:**
+```typescript
+describe('Complete User Flow', () => {
+  it('should complete reading and quiz flow', () => {
+    cy.visit('/');
+    
+    // Authentication
+    cy.get('[data-testid="google-signin"]').click();
+    
+    // Select athlete
+    cy.contains('Patrick Mahomes').click();
+    
+    // Read story
+    cy.contains('Take the Quiz!').should('be.visible');
+    cy.contains('Take the Quiz!').click();
+    
+    // Complete quiz
+    cy.contains('Kansas City').click();
+    cy.contains('Submit Answer').click();
+    cy.contains('Next Question').click();
+    
+    // Verify completion
+    cy.contains('Quiz Complete').should('be.visible');
+  });
+});
+```
+
+---
+
+## Performance & Optimization
+
+### Performance Metrics
+
+**Target Metrics:**
+- **First Contentful Paint**: < 1.5s
+- **Largest Contentful Paint**: < 2.5s
+- **Cumulative Layout Shift**: < 0.1
+- **Time to Interactive**: < 3.0s
+- **Bundle Size**: < 2MB total
+
+### Bundle Analysis
+
+```bash
+# Analyze bundle composition
+npm run analyze
+
+# Server-side bundle
+npm run analyze:server
+
+# Client-side bundle
+npm run analyze:browser
+```
+
+### Optimization Strategies
+
+**Code Splitting:**
+- Automatic route-based splitting via Next.js
+- Dynamic imports for large components
+- Lazy loading for non-critical features
+
+**Image Optimization:**
+- Next.js automatic image optimization
+- WebP/AVIF format conversion
+- Responsive image sizing
+
+**Caching Strategy:**
+- Static assets: 1 year cache
+- API responses: 5 minute cache
+- WordPress data: Object caching
+
+**Performance Monitoring:**
+```bash
+# Lighthouse audit
+lighthouse http://localhost:3000 --output html
+
+# Core Web Vitals
+npm run build
+npm start
+# Monitor with browser dev tools
+```
+
+---
+
+## API Reference
+
+### WordPress REST API Endpoints
+
+**Base URL**: `{WORDPRESS_URL}/wp-json/sports-heroes/v1/`
+
+#### Get User Progress
+```http
+GET /progress/{user_id}
+```
+
+**Response:**
+```json
+[
+  {
+    "user_id": 123,
+    "athlete_id": 1,
+    "athlete_name": "Patrick Mahomes",
+    "story_read": true,
+    "quiz_completed": true,
+    "quiz_score": 3,
+    "total_questions": 3,
+    "completion_date": "2024-01-15T10:30:00Z",
+    "time_spent_reading": 180
+  }
+]
+```
+
+#### Save Progress
+```http
+POST /progress
+Content-Type: application/json
+
+{
+  "user_id": 123,
+  "athlete_id": 1,
+  "athlete_name": "Patrick Mahomes",
+  "story_read": true,
+  "quiz_completed": false,
+  "quiz_score": 0,
+  "total_questions": 3,
+  "completion_date": "2024-01-15T10:30:00Z",
+  "time_spent_reading": 180
+}
+```
+
+#### Update Progress
+```http
+PUT /progress/{user_id}/{athlete_id}
+Content-Type: application/json
+
+{
+  "quiz_completed": true,
+  "quiz_score": 3,
+  "completion_date": "2024-01-15T10:35:00Z"
+}
+```
+
+### Authentication API
+
+**NextAuth.js Endpoints:**
+- `GET /api/auth/session` - Get current session
+- `POST /api/auth/signin` - Initiate sign-in
+- `POST /api/auth/signout` - Sign out user
+- `GET /api/auth/callback/google` - Google OAuth callback
+
+---
+
+## Troubleshooting
+
+### Common Issues
+
+**Authentication Problems:**
+```bash
+# Check Google OAuth configuration
+echo $GOOGLE_CLIENT_ID
+echo $GOOGLE_CLIENT_SECRET
+
+# Verify NextAuth URL
+echo $NEXTAUTH_URL
+
+# Test WordPress connection
+curl -X GET "${WORDPRESS_URL}/wp-json/wp/v2/users/me" \
+     -H "Authorization: Basic $(echo -n 'username:password' | base64)"
+```
+
+**WordPress API Issues:**
+```bash
+# Test plugin activation
+curl -X GET "${WORDPRESS_URL}/wp-json/sports-heroes/v1/progress/1"
+
+# Check application password
+# WordPress Admin → Users → Profile → Application Passwords
+
+# Verify plugin installation
+# WordPress Admin → Plugins → Sports Heroes Progress Tracker
+```
+
+**Build/Deployment Issues:**
+```bash
+# Clear Next.js cache
+rm -rf .next
+
+# Reinstall dependencies
+rm -rf node_modules package-lock.json
+npm install
+
+# Check environment variables
+npm run build
+```
+
+### Debug Mode
+
+**Enable Debug Logging:**
+```env
+# .env.local
+DEBUG=true
+NODE_ENV=development
+```
+
+**WordPress Debug:**
+```php
+// wp-config.php
+define('WP_DEBUG', true);
+define('WP_

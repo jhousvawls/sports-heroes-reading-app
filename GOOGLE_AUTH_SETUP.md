@@ -72,6 +72,8 @@ WORDPRESS_PASSWORD=your_wp_app_password
    - `GOOGLE_CLIENT_SECRET`: The Client Secret from Step 4
    - `NEXTAUTH_SECRET`: Generate a random string (you can use: `openssl rand -base64 32`)
 
+⚠️ **Important Note**: Due to Google's OAuth policies, localhost authentication may not work properly in production or with certain Google account configurations. For full testing and deployment, you'll need to use a proper domain with HTTPS.
+
 ## Step 6: Test the Authentication
 
 1. Start your development server:
