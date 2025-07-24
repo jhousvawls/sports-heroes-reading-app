@@ -53,7 +53,7 @@ const handler = NextAuth({
       }
       return true
     },
-    async jwt({ token, user, account }) {
+    async jwt({ token, user }) {
       // Persist WordPress user data in the token
       if (user?.wpUser) {
         token.wpUser = user.wpUser

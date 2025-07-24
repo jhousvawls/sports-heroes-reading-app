@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { athletes, Athlete } from '@/data/athletes';
 import { suggestedAthletes, SuggestedAthlete } from '@/data/suggestedAthletes';
@@ -16,7 +16,6 @@ import {
   faVolumeUp, 
   faVolumeMute, 
   faHome, 
-  faSignOutAlt, 
   faUser, 
   faTrophy, 
   faClock, 

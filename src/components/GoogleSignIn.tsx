@@ -2,7 +2,7 @@
 
 import { signIn, signOut, useSession } from 'next-auth/react';
 import { useState } from 'react';
-import { LogIn, LogOut, User } from 'lucide-react';
+import { LogOut, User } from 'lucide-react';
 
 export default function GoogleSignIn() {
   const { data: session, status } = useSession();

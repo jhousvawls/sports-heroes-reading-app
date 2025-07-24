@@ -211,7 +211,7 @@ class WordPressAPI {
   async getUserProgress(userId: number): Promise<ProgressRecord[]> {
     try {
       const posts = await this.makeRequest(`sports-progress?meta_key=user_id&meta_value=${userId}`);
-      return posts.map((post: { content: { rendered: string } }) => JSON.parse(post.content.rendered));
+      return posts.map((post: Record<string, unknown>) => JSON.parse((post.content as { rendered: string }).rendered));
     } catch (error) {
       console.error('Error fetching progress:', error);
       return [];
@@ -222,12 +222,12 @@ class WordPressAPI {
   async getAthleteProgress(userId: number, athleteId: number): Promise<ProgressRecord | null> {
     try {
       const posts = await this.makeRequest(`sports-progress?meta_key=user_id&meta_value=${userId}`);
-      const athletePost = posts.find((post: { content: { rendered: string } }) => {
-        const content = JSON.parse(post.content.rendered);
+      const athletePost = posts.find((post: Record<string, unknown>) => {
+        const content = JSON.parse((post.content as { rendered: string }).rendered);
         return content.athlete_id === athleteId;
       });
       
-      return athletePost ? JSON.parse(athletePost.content.rendered) : null;
+      return athletePost ? JSON.parse((athletePost.content as { rendered: string }).rendered) : null;
     } catch (error) {
       console.error('Error fetching athlete progress:', error);
       return null;
@@ -238,13 +238,13 @@ class WordPressAPI {
   async updateProgress(userId: number, athleteId: number, updates: Partial<ProgressRecord>): Promise<void> {
     try {
       const posts = await this.makeRequest(`sports-progress?meta_key=user_id&meta_value=${userId}`);
-      const athletePost = posts.find((post: { id: number; content: { rendered: string } }) => {
-        const content = JSON.parse(post.content.rendered);
+      const athletePost = posts.find((post: Record<string, unknown>) => {
+        const content = JSON.parse((post.content as { rendered: string }).rendered);
         return content.athlete_id === athleteId;
       });
 
       if (athletePost) {
-        const currentProgress = JSON.parse(athletePost.content.rendered);
+        const currentProgress = JSON.parse((athletePost.content as { rendered: string }).rendered);
         const updatedProgress = { ...currentProgress, ...updates };
 
         await this.makeRequest(`sports-progress/${athletePost.id}`, {
