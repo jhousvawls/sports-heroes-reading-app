@@ -10,6 +10,7 @@ import GoogleSignIn from '@/components/GoogleSignIn';
 import PrintPreview from '@/components/PrintPreview';
 import SuggestionModal from '@/components/SuggestionModal';
 import { useProgress } from '@/hooks/useProgress';
+import { useGuestMode } from '@/contexts/GuestModeContext';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
   faArrowLeft, 
@@ -30,6 +31,7 @@ type AthleteType = Athlete | SuggestedAthlete;
 
 export default function Home() {
   const { data: session, status } = useSession();
+  const { isGuestMode, guestUser, saveGuestProgress, getGuestAthleteProgress } = useGuestMode();
   const [currentView, setCurrentView] = useState<ViewState>('home');
   const [selectedAthlete, setSelectedAthlete] = useState<AthleteType | null>(null);
   const [isReading, setIsReading] = useState(false);
@@ -37,8 +39,9 @@ export default function Home() {
   const [showPrintPreview, setShowPrintPreview] = useState(false);
   const [showSuggestionModal, setShowSuggestionModal] = useState(false);
 
-  // Get WordPress user ID from session
+  // Get WordPress user ID from session or use guest mode
   const wpUserId = session?.user?.wpUserId || null;
+  const isAuthenticated = session?.user || isGuestMode;
 
   const { 
     saveStoryRead, 
@@ -58,9 +61,93 @@ export default function Home() {
     );
   }
 
-  // Show Google Sign-In if not authenticated
-  if (!session?.user) {
+  // Show Google Sign-In if not authenticated and not in guest mode
+  if (!isAuthenticated) {
     return <GoogleSignIn />;
+  }
+
+  // Check user approval status if approval system is enabled (only for regular users, not guests)
+  if (session?.user?.approvalStatus?.approval_required && !session.user.approvalStatus?.is_approved) {
+    if (session.user.approvalStatus.approval_status === 'pending') {
+      // User is pending approval
+      return (
+        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+          <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-8 text-center">
+            <div className="mb-6">
+              <div className="mx-auto w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mb-4">
+                <svg className="w-8 h-8 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <h1 className="text-2xl font-bold text-gray-900 mb-2">
+                Account Pending Approval
+              </h1>
+            </div>
+            <div className="text-gray-600 space-y-4 mb-6">
+              <p>
+                Thank you for signing up for the Sports Heroes Reading App!
+              </p>
+              <p>
+                Your account is currently pending approval from an administrator. 
+                You'll receive an email notification once your account has been approved.
+              </p>
+            </div>
+            <div className="space-y-3">
+              <button
+                onClick={() => window.location.reload()}
+                className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                Check Status Again
+              </button>
+            </div>
+            <div className="mt-6 pt-6 border-t border-gray-200">
+              <p className="text-sm text-gray-500">
+                Signed in as: <strong>{session.user.email}</strong>
+              </p>
+            </div>
+          </div>
+        </div>
+      );
+    } else if (session.user.approvalStatus.approval_status === 'denied') {
+      // User was denied access
+      return (
+        <div className="min-h-screen bg-gradient-to-br from-red-50 to-pink-100 flex items-center justify-center p-4">
+          <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-8 text-center">
+            <div className="mb-6">
+              <div className="mx-auto w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-4">
+                <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                </svg>
+              </div>
+              <h1 className="text-2xl font-bold text-gray-900 mb-2">
+                Access Denied
+              </h1>
+            </div>
+            <div className="text-gray-600 space-y-4 mb-6">
+              <p>
+                We're sorry, but your access to the Sports Heroes Reading App has been denied.
+              </p>
+              <p>
+                If you believe this is an error, please contact our support team for assistance.
+              </p>
+            </div>
+            <div className="space-y-3">
+              <a
+                href="mailto:support@sportsheroes.com?subject=Access Denied - Account Review Request"
+                className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors inline-block"
+              >
+                Contact Support
+              </a>
+            </div>
+            <div className="mt-6 pt-6 border-t border-gray-200">
+              <p className="text-sm text-gray-500">
+                Account: <strong>{session.user.email}</strong>
+              </p>
+            </div>
+          </div>
+        </div>
+      );
+    }
   }
 
   const handleAthleteSelect = (athlete: AthleteType) => {
@@ -76,16 +163,36 @@ export default function Home() {
   };
 
   const handleStartQuiz = async () => {
-    if (selectedAthlete && wpUserId && storyStartTime) {
+    if (selectedAthlete && storyStartTime) {
       const timeSpent = Math.round((Date.now() - storyStartTime) / 1000);
-      await saveStoryRead(selectedAthlete.id, selectedAthlete.name, timeSpent);
+      
+      if (isGuestMode) {
+        // Save to guest mode localStorage
+        saveGuestProgress(selectedAthlete.id, selectedAthlete.name, {
+          story_read: true,
+          time_spent_reading: timeSpent
+        });
+      } else if (wpUserId) {
+        // Save to WordPress
+        await saveStoryRead(selectedAthlete.id, selectedAthlete.name, timeSpent);
+      }
     }
     setCurrentView('quiz');
   };
 
   const handleQuizComplete = async (score: number) => {
-    if (selectedAthlete && wpUserId) {
-      await saveQuizScore(selectedAthlete.id, selectedAthlete.name, score, selectedAthlete.questions.length);
+    if (selectedAthlete) {
+      if (isGuestMode) {
+        // Save to guest mode localStorage
+        saveGuestProgress(selectedAthlete.id, selectedAthlete.name, {
+          quiz_completed: true,
+          quiz_score: score,
+          total_questions: selectedAthlete.questions.length
+        });
+      } else if (wpUserId) {
+        // Save to WordPress
+        await saveQuizScore(selectedAthlete.id, selectedAthlete.name, score, selectedAthlete.questions.length);
+      }
       console.log(`Quiz completed with score: ${score}/${selectedAthlete.questions.length}`);
     }
   };
@@ -165,7 +272,12 @@ export default function Home() {
         <div className="md:hidden mt-2 pt-2 border-t border-dark">
           <div className="flex items-center gap-2 text-sm text-secondary">
             <FontAwesomeIcon icon={faUser} className="w-4 h-4" />
-            <span>{session.user.name || session.user.email}</span>
+            <span>
+              {isGuestMode 
+                ? 'Guest User' 
+                : (session?.user?.name || session?.user?.email || 'User')
+              }
+            </span>
           </div>
         </div>
       </div>
@@ -195,7 +307,10 @@ export default function Home() {
               
               <div className="grid gap-4 sm:gap-6">
                 {[...athletes, ...suggestedAthletes].map((athlete) => {
-                  const athleteProgress = getAthleteProgress(athlete.id);
+                  // Get progress from either WordPress or guest mode
+                  const athleteProgress = isGuestMode 
+                    ? getGuestAthleteProgress(athlete.id)
+                    : getAthleteProgress(athlete.id);
                   const isSuggested = athlete.id > 100; // Suggested athletes have IDs > 100
                   return (
                     <div key={athlete.id} className="border border-dark rounded-lg p-4 sm:p-6 bg-smokey-gray">
@@ -280,7 +395,10 @@ export default function Home() {
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 max-w-6xl mx-auto">
                 {athletes.map((athlete) => {
-                  const athleteProgress = getAthleteProgress(athlete.id);
+                  // Get progress from either WordPress or guest mode
+                  const athleteProgress = isGuestMode 
+                    ? getGuestAthleteProgress(athlete.id)
+                    : getAthleteProgress(athlete.id);
                   return (
                     <AthleteCard
                       key={athlete.id}

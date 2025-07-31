@@ -42,10 +42,15 @@ const handler = NextAuth({
             })
           }
           
-          // Store WordPress user data in the user object
+          // Check user approval status
+          const approvalStatus = await wordpressAPI.getUserApprovalStatus(wpUser.id)
+          
+          // Store WordPress user data and approval status in the user object
           user.wpUserId = wpUser.id
           user.wpUser = wpUser
+          user.approvalStatus = approvalStatus
           
+          // Always return true - we'll handle approval redirects in the main app
           return true
         } catch (error) {
           console.error('Error during sign in:', error)
@@ -55,18 +60,20 @@ const handler = NextAuth({
       return true
     },
     async jwt({ token, user }) {
-      // Persist WordPress user data in the token
+      // Persist WordPress user data and approval status in the token
       if (user?.wpUser) {
         token.wpUser = user.wpUser
         token.wpUserId = user.wpUserId
+        token.approvalStatus = user.approvalStatus
       }
       return token
     },
     async session({ session, token }) {
-      // Send WordPress user data to the client
+      // Send WordPress user data and approval status to the client
       if (token.wpUser) {
         session.user.wpUser = token.wpUser as WordPressUser
         session.user.wpUserId = token.wpUserId as number
+        session.user.approvalStatus = token.approvalStatus as any
       }
       return session
     }

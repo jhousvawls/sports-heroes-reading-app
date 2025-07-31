@@ -2,10 +2,12 @@
 
 import { signIn, signOut, useSession } from 'next-auth/react';
 import { useState } from 'react';
-import { LogOut, User } from 'lucide-react';
+import { LogOut, User, UserCheck } from 'lucide-react';
+import { useGuestMode } from '@/contexts/GuestModeContext';
 
 export default function GoogleSignIn() {
   const { data: session, status } = useSession();
+  const { isGuestMode, guestUser, enterGuestMode, exitGuestMode } = useGuestMode();
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSignIn = async () => {
@@ -22,12 +24,20 @@ export default function GoogleSignIn() {
   const handleSignOut = async () => {
     setIsLoading(true);
     try {
-      await signOut({ callbackUrl: '/' });
+      if (isGuestMode) {
+        exitGuestMode();
+      } else {
+        await signOut({ callbackUrl: '/' });
+      }
     } catch (error) {
       console.error('Sign out error:', error);
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleGuestMode = () => {
+    enterGuestMode();
   };
 
   // Loading state
@@ -43,15 +53,27 @@ export default function GoogleSignIn() {
     );
   }
 
-  // If user is signed in, show user info and sign out option
-  if (session?.user) {
+  // If user is signed in or in guest mode, show user info and sign out option
+  if (session?.user || isGuestMode) {
+    const currentUser = session?.user || guestUser;
+    const isGuest = isGuestMode && !session?.user;
+    
     return (
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-2 px-3 py-2 bg-smokey-gray rounded-lg">
-          <User className="w-4 h-4 text-secondary" />
+          {isGuest ? (
+            <UserCheck className="w-4 h-4 text-green-400" />
+          ) : (
+            <User className="w-4 h-4 text-secondary" />
+          )}
           <span className="text-sm font-medium text-white">
-            {session.user.name || session.user.email}
+            {isGuest ? 'Guest User' : (currentUser?.name || currentUser?.email)}
           </span>
+          {isGuest && (
+            <span className="text-xs bg-green-600 text-white px-2 py-1 rounded-full">
+              Guest
+            </span>
+          )}
         </div>
         
         <button
@@ -60,7 +82,7 @@ export default function GoogleSignIn() {
           className="flex items-center gap-2 px-3 py-2 text-red-400 hover:text-red-300 rounded-lg hover:bg-red-900 disabled:opacity-50"
         >
           <LogOut className="w-4 h-4" />
-          <span className="hidden sm:inline">Sign Out</span>
+          <span className="hidden sm:inline">{isGuest ? 'Exit Guest' : 'Sign Out'}</span>
         </button>
       </div>
     );
@@ -112,9 +134,32 @@ export default function GoogleSignIn() {
           )}
         </button>
 
+        <div className="mt-4 text-center">
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-gray-600"></div>
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-2 bg-dark-card text-secondary">or</span>
+            </div>
+          </div>
+        </div>
+
+        <button
+          onClick={handleGuestMode}
+          disabled={isLoading}
+          className="w-full mt-4 bg-green-600 hover:bg-green-700 disabled:bg-green-800 text-white font-bold py-3 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center gap-3 shadow-lg"
+        >
+          <UserCheck className="w-5 h-5" />
+          Try as Guest
+        </button>
+
         <div className="mt-6 text-center">
           <p className="text-xs text-secondary">
-            By signing in, you agree to our terms of service and privacy policy.
+            Guest mode saves progress locally. Sign in with Google for cloud sync.
+          </p>
+          <p className="text-xs text-secondary mt-2">
+            By using this app, you agree to our terms of service and privacy policy.
           </p>
         </div>
       </div>

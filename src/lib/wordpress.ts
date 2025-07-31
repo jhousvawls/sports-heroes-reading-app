@@ -341,6 +341,39 @@ class WordPressAPI {
       return false;
     }
   }
+
+  // Get user approval status
+  async getUserApprovalStatus(userId: number): Promise<{
+    user_id: number;
+    approval_status: string;
+    is_approved: boolean;
+    approval_required: boolean;
+  }> {
+    try {
+      const response = await fetch(`${this.baseUrl}/wp-json/sports-heroes/v1/user-status/${userId}`);
+      
+      if (!response.ok) {
+        // If the approval system isn't installed, assume no approval required
+        return {
+          user_id: userId,
+          approval_status: 'approved',
+          is_approved: true,
+          approval_required: false
+        };
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Error checking user approval status:', error);
+      // Default to approved if we can't check (approval system not installed)
+      return {
+        user_id: userId,
+        approval_status: 'approved',
+        is_approved: true,
+        approval_required: false
+      };
+    }
+  }
 }
 
 export const wordpressAPI = new WordPressAPI();

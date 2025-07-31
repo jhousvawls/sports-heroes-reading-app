@@ -5,6 +5,7 @@ import "@/lib/fontawesome";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import ServiceWorkerRegistration from "@/components/ServiceWorkerRegistration";
 import SessionProvider from "@/components/SessionProvider";
+import { GuestModeProvider } from "@/contexts/GuestModeContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -49,11 +50,13 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <SessionProvider>
-          <ErrorBoundary>
-            {children}
-          </ErrorBoundary>
-        </SessionProvider>
+        <GuestModeProvider>
+          <SessionProvider>
+            <ErrorBoundary>
+              {children}
+            </ErrorBoundary>
+          </SessionProvider>
+        </GuestModeProvider>
         <ServiceWorkerRegistration />
       </body>
     </html>
