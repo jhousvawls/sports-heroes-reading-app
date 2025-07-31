@@ -12,7 +12,6 @@ import SuggestionModal from '@/components/SuggestionModal';
 import { useProgress } from '@/hooks/useProgress';
 import { useGuestMode } from '@/contexts/GuestModeContext';
 import { useToast } from '@/contexts/ToastContext';
-import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
   faArrowLeft, 
@@ -33,8 +32,8 @@ type AthleteType = Athlete | SuggestedAthlete;
 
 export default function Home() {
   const { data: session, status } = useSession();
-  const { isGuestMode, guestUser, saveGuestProgress, getGuestAthleteProgress } = useGuestMode();
-  const { showSuccess, showError } = useToast();
+  const { isGuestMode, saveGuestProgress, getGuestAthleteProgress } = useGuestMode();
+  const { showSuccess } = useToast();
   const [currentView, setCurrentView] = useState<ViewState>('home');
   const [selectedAthlete, setSelectedAthlete] = useState<AthleteType | null>(null);
   const [isReading, setIsReading] = useState(false);
@@ -92,7 +91,7 @@ export default function Home() {
               </p>
               <p>
                 Your account is currently pending approval from an administrator. 
-                You'll receive an email notification once your account has been approved.
+                You&apos;ll receive an email notification once your account has been approved.
               </p>
             </div>
             <div className="space-y-3">
@@ -128,7 +127,7 @@ export default function Home() {
             </div>
             <div className="text-gray-600 space-y-4 mb-6">
               <p>
-                We're sorry, but your access to the Sports Heroes Reading App has been denied.
+                We&apos;re sorry, but your access to the Sports Heroes Reading App has been denied.
               </p>
               <p>
                 If you believe this is an error, please contact our support team for assistance.

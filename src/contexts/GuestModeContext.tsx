@@ -1,7 +1,6 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { useToast } from '@/contexts/ToastContext';
 
 interface GuestUser {
   id: string;
@@ -49,14 +48,6 @@ export function GuestModeProvider({ children }: { children: ReactNode }) {
   const [isGuestMode, setIsGuestMode] = useState(false);
   const [guestProgress, setGuestProgress] = useState<GuestProgress>({});
   
-  // Use toast if available (avoid circular dependency)
-  let showSuccess: ((message: string) => void) | undefined;
-  try {
-    const toast = useToast();
-    showSuccess = toast.showSuccess;
-  } catch {
-    // Toast context not available, continue without it
-  }
 
   // Load guest progress from localStorage on mount
   useEffect(() => {

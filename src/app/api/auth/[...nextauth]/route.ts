@@ -73,7 +73,12 @@ const handler = NextAuth({
       if (token.wpUser) {
         session.user.wpUser = token.wpUser as WordPressUser
         session.user.wpUserId = token.wpUserId as number
-        session.user.approvalStatus = token.approvalStatus as any
+        session.user.approvalStatus = token.approvalStatus as {
+          user_id: number;
+          approval_status: string;
+          is_approved: boolean;
+          approval_required: boolean;
+        }
       }
       return session
     }

@@ -48,13 +48,13 @@ export default function PendingApprovalPage() {
           </p>
           <p>
             Your account is currently pending approval from an administrator. 
-            You'll receive an email notification once your account has been approved.
+            You&apos;ll receive an email notification once your account has been approved.
           </p>
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
             <p className="text-sm text-blue-800">
               <strong>What happens next?</strong><br />
               • An administrator will review your account<br />
-              • You'll receive an email when approved<br />
+              • You&apos;ll receive an email when approved<br />
               • You can then sign in and start reading!
             </p>
           </div>

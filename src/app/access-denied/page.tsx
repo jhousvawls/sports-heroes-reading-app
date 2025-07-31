@@ -44,7 +44,7 @@ export default function AccessDeniedPage() {
 
         <div className="text-gray-600 space-y-4 mb-6">
           <p>
-            We're sorry, but your access to the Sports Heroes Reading App has been denied.
+            We&apos;re sorry, but your access to the Sports Heroes Reading App has been denied.
           </p>
           <p>
             This could be due to various reasons such as eligibility requirements or administrative policies.
