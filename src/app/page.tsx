@@ -11,6 +11,8 @@ import PrintPreview from '@/components/PrintPreview';
 import SuggestionModal from '@/components/SuggestionModal';
 import { useProgress } from '@/hooks/useProgress';
 import { useGuestMode } from '@/contexts/GuestModeContext';
+import { useToast } from '@/contexts/ToastContext';
+import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
   faArrowLeft, 
@@ -32,6 +34,7 @@ type AthleteType = Athlete | SuggestedAthlete;
 export default function Home() {
   const { data: session, status } = useSession();
   const { isGuestMode, guestUser, saveGuestProgress, getGuestAthleteProgress } = useGuestMode();
+  const { showSuccess, showError } = useToast();
   const [currentView, setCurrentView] = useState<ViewState>('home');
   const [selectedAthlete, setSelectedAthlete] = useState<AthleteType | null>(null);
   const [isReading, setIsReading] = useState(false);
@@ -172,6 +175,7 @@ export default function Home() {
           story_read: true,
           time_spent_reading: timeSpent
         });
+        showSuccess('Story progress saved locally!');
       } else if (wpUserId) {
         // Save to WordPress
         await saveStoryRead(selectedAthlete.id, selectedAthlete.name, timeSpent);
@@ -189,6 +193,13 @@ export default function Home() {
           quiz_score: score,
           total_questions: selectedAthlete.questions.length
         });
+        
+        // Celebratory message for kids
+        if (score === selectedAthlete.questions.length) {
+          showSuccess(`🎉 Perfect score! You got all ${score} questions right!`);
+        } else {
+          showSuccess(`Great job! You scored ${score} out of ${selectedAthlete.questions.length}!`);
+        }
       } else if (wpUserId) {
         // Save to WordPress
         await saveQuizScore(selectedAthlete.id, selectedAthlete.name, score, selectedAthlete.questions.length);

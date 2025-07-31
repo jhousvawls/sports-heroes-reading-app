@@ -6,6 +6,7 @@ import ErrorBoundary from "@/components/ErrorBoundary";
 import ServiceWorkerRegistration from "@/components/ServiceWorkerRegistration";
 import SessionProvider from "@/components/SessionProvider";
 import { GuestModeProvider } from "@/contexts/GuestModeContext";
+import { ToastProvider } from "@/contexts/ToastContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -52,9 +53,11 @@ export default function RootLayout({
       >
         <GuestModeProvider>
           <SessionProvider>
-            <ErrorBoundary>
-              {children}
-            </ErrorBoundary>
+            <ToastProvider>
+              <ErrorBoundary>
+                {children}
+              </ErrorBoundary>
+            </ToastProvider>
           </SessionProvider>
         </GuestModeProvider>
         <ServiceWorkerRegistration />

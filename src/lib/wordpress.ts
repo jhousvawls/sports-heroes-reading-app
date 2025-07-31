@@ -42,24 +42,77 @@ class WordPressAPI {
     this.password = process.env.WORDPRESS_PASSWORD || '';
   }
 
-  private async makeRequest(endpoint: string, options: RequestInit = {}) {
+  private async makeRequest(endpoint: string, options: RequestInit = {}, retries = 2) {
     const url = `${this.baseUrl}/index.php?rest_route=/wp/v2/${endpoint}`;
     const auth = btoa(`${this.username}:${this.password}`);
     
-    const response = await fetch(url, {
-      ...options,
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Basic ${auth}`,
-        ...options.headers,
-      },
-    });
+    for (let attempt = 0; attempt <= retries; attempt++) {
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+        
+        const response = await fetch(url, {
+          ...options,
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Basic ${auth}`,
+            ...options.headers,
+          },
+          signal: controller.signal,
+        });
 
-    if (!response.ok) {
-      throw new Error(`WordPress API error: ${response.statusText}`);
+        clearTimeout(timeoutId);
+
+        if (!response.ok) {
+          const errorMessage = this.getErrorMessage(response.status);
+          throw new Error(errorMessage);
+        }
+
+        return response.json();
+      } catch (error) {
+        // If this is the last attempt, throw the error
+        if (attempt === retries) {
+          if (error instanceof Error) {
+            if (error.name === 'AbortError') {
+              throw new Error('Connection timed out. Please check your internet connection.');
+            }
+            throw new Error(this.getFriendlyErrorMessage(error.message));
+          }
+          throw new Error('Something went wrong. Please try again.');
+        }
+        
+        // Wait before retrying (exponential backoff)
+        await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempt) * 1000));
+      }
     }
+  }
 
-    return response.json();
+  private getErrorMessage(status: number): string {
+    switch (status) {
+      case 401:
+        return 'Authentication failed. Please check your login credentials.';
+      case 403:
+        return 'Access denied. You don\'t have permission to perform this action.';
+      case 404:
+        return 'The requested information could not be found.';
+      case 500:
+        return 'Server error. Please try again in a moment.';
+      default:
+        return `Network error (${status}). Please check your connection.`;
+    }
+  }
+
+  private getFriendlyErrorMessage(message: string): string {
+    if (message.includes('Failed to fetch') || message.includes('NetworkError')) {
+      return 'Unable to connect. Please check your internet connection.';
+    }
+    if (message.includes('timeout') || message.includes('AbortError')) {
+      return 'Connection timed out. Please try again.';
+    }
+    if (message.includes('WordPress API error')) {
+      return 'Unable to save your progress right now. Don\'t worry, you can continue reading!';
+    }
+    return 'Something went wrong. Please try again.';
   }
 
   // Create or get user
